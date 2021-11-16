@@ -1,0 +1,14 @@
+name: Manually trigger newspaper delivery
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Enter recipient email"
+        required: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run
+        run: cargo run
