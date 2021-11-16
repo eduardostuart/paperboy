@@ -8,9 +8,9 @@
 
 Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) which includes workflows to deliver RSS by email.
 
-1. The first thing you'll need to do is click on "Use this template";
-2. Then update the `"subscriptions.txt"` file. Include your list of websites;
-3. You'll also need to include a few `GitHub Secrets`:
+1. The first thing you'll need to do is click on `"use this template"`;
+2. Update the `"subscriptions.txt"` file. Include your list of websites;
+3. You'll also need to include some environment variables (`GitHub Secrets`):
 
 ```bash
 # Which service are you using? fastmail? gmail? sendgrid? ... 
