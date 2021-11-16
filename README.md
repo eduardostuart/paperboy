@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/eduardostuart/paperboy/main/.github/resources/paperboy.jpg" alt="Paperboy" width="250" align="right">
+<img src="https://raw.githubusercontent.com/eduardostuart/paperboy/main/.github/resources/paperboy.png" alt="Paperboy" width="160" align="right">
 
 # Paperboy
 
