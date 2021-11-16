@@ -4,9 +4,13 @@
 
 [![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
-## Usage
+Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that delivers [RSS](https://en.wikipedia.org/wiki/RSS) by email.
 
-Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) which includes workflows to deliver RSS by email.
+## Why?
+
+No trackers, easy to set up, and does the job.
+
+## Usage
 
 1. The first thing you'll need to do is click on `"use this template"`;
 2. Update the `"subscriptions.txt"` file. Include your list of websites;
