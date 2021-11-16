@@ -12,7 +12,7 @@ Free, no trackers, easy to set up, and does the job.
 
 ## Usage
 
-1. The first thing you'll need to do is click on `"use this template"`;
+1. Click on `"use this template"`;
 2. Update the `"subscriptions.txt"` file. Include your list of websites;
 3. You'll also need to include some environment variables (`GitHub Secrets`):
 
