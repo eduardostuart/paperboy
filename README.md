@@ -8,7 +8,7 @@ Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating
 
 ## Why?
 
-Free, no trackers, easy to setup, and does the job.
+Free, no trackers, easy to set up, and does the job.
 
 ## Usage
 
