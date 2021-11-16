@@ -11,4 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run
-        run: cargo run
+        run: cargo run --verbose
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_RELAY: ${{ secrets.SMTP_RELAY }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          MAIL_TO: ${{ github.event.inputs.logLevel || secrets.MAIL_TO }}
