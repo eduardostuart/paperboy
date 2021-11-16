@@ -34,10 +34,10 @@ MAIL_TO="Eduardo <to@domain.com>"
 Bonus:
 
 1. **If you want a different template:**
-Create a new `Handlebars` file in the `emails` folder or update the existing one.
+> Create a new `Handlebars` file in the `emails` folder or update the existing one.
 
 2. **If you want to receive emails multiple times per day or at a different hour of the day**
-Update the `cron` property inside the workflow `deliver.yml`
+> Update the `cron` property inside the workflow `deliver.yml`
 
 ## Tests
 
