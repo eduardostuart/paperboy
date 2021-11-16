@@ -2,7 +2,7 @@
 
 # Paperboy
 
-![Test](https://github.com/eduardostuart/paperboy/workflows/ci/badge.svg?branch=main)
+[![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
 ## Usage
 
