@@ -26,6 +26,8 @@ async fn main() -> Result<()> {
 
     match result {
         Some(items) => {
+            println!("New items: {:#?}", items);
+
             let mailer_config = MailerConfig {
                 from: option_env!("SMTP_FROM").unwrap().to_string(),
                 credentials: Credentials::new(
@@ -41,7 +43,7 @@ async fn main() -> Result<()> {
                 .deliver(items, to)
                 .await?;
         }
-        None => panic!("Nothing new for today"),
+        None => println!("Nothing new for today"),
     }
 
     Ok(())
