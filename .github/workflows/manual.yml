@@ -1,10 +1,5 @@
 name: Manually trigger newspaper delivery
-on:
-  workflow_dispatch:
-    inputs:
-      email:
-        description: "Enter recipient email"
-        required: true
+on: [workflow_dispatch]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,4 +12,4 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SMTP_RELAY: ${{ secrets.SMTP_RELAY }}
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
-          MAIL_TO: ${{ github.event.inputs.logLevel || secrets.MAIL_TO }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
