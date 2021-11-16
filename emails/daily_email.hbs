@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>RSS by email</title>
+</head>
+
+<body>
+    <h2>RSS daily</h2>
+    <ul>
+        {{#each items}}
+        <li>
+            <h3><a href="{{ url }}">{{ title }}</a></h3>
+            <ul>
+                {{#each entries}}
+                <li>
+                    <a href="{{ url }}">{{ title }}</a>
+                </li>
+                {{/each}}
+            </ul>
+        </li>
+        {{/each}}
+    </ul>
+</body>
+
+</html>
