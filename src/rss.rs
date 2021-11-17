@@ -107,18 +107,17 @@ impl FeedLoader {
         while let Some(response) = st.next().await {
             match response {
                 Ok(feed) => {
-                    if feed.entries.len() > 0 {
+                    if !feed.entries.is_empty() {
                         items.push(feed)
                     }
                 }
                 Err(e) => {
                     println!("error {}", e);
-                    ()
                 }
             };
         }
 
-        if items.len() > 0 {
+        if !items.is_empty() {
             Some(items)
         } else {
             None

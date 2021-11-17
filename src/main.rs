@@ -1,3 +1,5 @@
+// if the env variables are not defined just panic!
+#![allow(clippy::option_env_unwrap)]
 use lettre::{message::Mailbox, transport::smtp::authentication::Credentials};
 use mailer::MailerConfig;
 use paperboy::Paperboy;
