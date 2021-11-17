@@ -721,6 +721,7 @@ dependencies = [
  "futures",
  "handlebars",
  "lettre",
+ "rand",
  "reqwest",
  "serde",
  "serde_json",
