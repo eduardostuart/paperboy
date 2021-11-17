@@ -17,7 +17,7 @@ pub fn load_from_file(file: &str) -> Vec<String> {
 #[cfg(test)]
 mod test {
     use crate::test_util;
-    use std::{fs, panic};
+    use std::fs;
 
     use super::*;
 
@@ -29,7 +29,7 @@ https://a/feed
 https://b/feed"#,
         );
 
-        let result = panic::catch_unwind(|| {
+        test_util::run(|| {
             let subs = load_from_file(&file_path);
             assert_eq!(2, subs.clone().len());
             assert_eq!(subs.clone().into_iter().nth(0).unwrap(), "https://a/feed");
@@ -37,8 +37,6 @@ https://b/feed"#,
         });
 
         fs::remove_dir_all(path).unwrap();
-
-        assert!(result.is_ok());
     }
 
     #[test]
@@ -53,7 +51,7 @@ https://b/feed
 https://c/feed"#,
         );
 
-        let result = panic::catch_unwind(|| {
+        test_util::run(|| {
             let read_line = |vec: Vec<String>, row: usize| vec.into_iter().nth(row);
             let subs = load_from_file(&file_path);
             assert_eq!(3, subs.clone().len());
@@ -63,8 +61,6 @@ https://c/feed"#,
         });
 
         fs::remove_dir_all(path).unwrap();
-
-        assert!(result.is_ok());
     }
 
     #[test]
