@@ -16,19 +16,14 @@ pub fn load_from_file(file: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod test {
-    use std::{
-        fs::{self, create_dir_all, File},
-        io::Write,
-        panic,
-    };
-
-    use rand::{distributions::Alphanumeric, Rng};
+    use crate::test_util;
+    use std::{fs, panic};
 
     use super::*;
 
     #[test]
     fn should_be_able_to_load_subscriptions() {
-        let (path, file_path) = create_tmp_test_file(
+        let (path, file_path) = test_util::create_tmp_file(
             r#"
 https://a/feed
 https://b/feed"#,
@@ -48,7 +43,7 @@ https://b/feed"#,
 
     #[test]
     fn should_ignore_empty_lines() {
-        let (path, file_path) = create_tmp_test_file(
+        let (path, file_path) = test_util::create_tmp_file(
             r#"
 https://a/feed
 
@@ -72,27 +67,9 @@ https://c/feed"#,
         assert!(result.is_ok());
     }
 
-    fn create_tmp_test_file(content: &str) -> (String, String) {
-        let random: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(7)
-            .map(char::from)
-            .collect();
-
-        let path = format!(".tmp{}", random);
-        let file_path = format!("{}/file.txt", &path);
-
-        create_dir_all(&path).unwrap();
-
-        let file = File::create(&file_path).unwrap();
-        write!(&file, "{}", &content).unwrap();
-
-        (String::from(path), file_path.to_string())
-    }
-
     #[test]
     fn should_ignore_items_starting_with_hash() {
-        let (path, file_path) = create_tmp_test_file(
+        let (path, file_path) = test_util::create_tmp_file(
             r#"
 https://a/feed
 #https://b/feed
@@ -100,7 +77,7 @@ https://c/feed
 #https://d/feed"#,
         );
 
-        let result = panic::catch_unwind(|| {
+        test_util::run(|| {
             let subs = load_from_file(&file_path);
             assert_eq!(2, subs.clone().len());
             assert_eq!(subs.clone().into_iter().nth(0).unwrap(), "https://a/feed");
@@ -108,7 +85,5 @@ https://c/feed
         });
 
         fs::remove_dir_all(path).unwrap();
-
-        assert!(result.is_ok());
     }
 }
