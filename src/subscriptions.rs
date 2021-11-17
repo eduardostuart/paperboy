@@ -5,7 +5,7 @@ pub fn load_from_file(file: &str) -> Vec<String> {
         .unwrap()
         .lines()
         .filter_map(|s| {
-            if s.trim().is_empty() {
+            if s.trim().is_empty() || s.starts_with('#') {
                 None
             } else {
                 Some(String::from(s.trim()))
@@ -88,5 +88,27 @@ https://c/feed"#,
         write!(&file, "{}", &content).unwrap();
 
         (String::from(path), file_path.to_string())
+    }
+
+    #[test]
+    fn should_ignore_items_starting_with_hash() {
+        let (path, file_path) = create_tmp_test_file(
+            r#"
+https://a/feed
+#https://b/feed
+https://c/feed
+#https://d/feed"#,
+        );
+
+        let result = panic::catch_unwind(|| {
+            let subs = load_from_file(&file_path);
+            assert_eq!(2, subs.clone().len());
+            assert_eq!(subs.clone().into_iter().nth(0).unwrap(), "https://a/feed");
+            assert_eq!(subs.into_iter().nth(1).unwrap(), "https://c/feed");
+        });
+
+        fs::remove_dir_all(path).unwrap();
+
+        assert!(result.is_ok());
     }
 }
