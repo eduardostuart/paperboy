@@ -4,7 +4,7 @@
 
 [![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
-Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that delivers [RSS](https://en.wikipedia.org/wiki/RSS) by email.
+Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that delivers new posts from all your favorite sites by email. 
 
 ## Why?
 
@@ -12,8 +12,8 @@ Free, no trackers, easy to set up, and does the job.
 
 ## Usage
 
-1. Click on `"use this template"`;
-2. Update the `"subscriptions.txt"` file. Include your list of websites;
+1. Click on `use this template`;
+2. Update the `subscriptions.txt` file. Include your list of websites;
 3. Include these environment variables (`GitHub Secrets`):
 
 ```bash
@@ -24,11 +24,13 @@ SMTP_RELAY="smtp.fastmail.com"
 SMTP_USERNAME="username" 
 SMTP_PASSWORD="password" 
 
-# Who is sending this email? Use "Name <email@domain.com>" format
-SMTP_FROM="RSS <rss@your-domain.com>" 
+# Who will send new posts by email? 
+# Use "Name <email@domain.com>" format
+SMTP_FROM="Paperboy <rss@your-domain.com>" 
 
-# Who will receive this the daily RSS email?
-MAIL_TO="Eduardo <to@domain.com>" 
+# The recipient 
+# Use "Name <email@domain.com>" format
+MAIL_TO="Eduardo <to@your-domain.com>" 
 ```
 
 Bonus:
