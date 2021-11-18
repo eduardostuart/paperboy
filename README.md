@@ -15,7 +15,7 @@ Free, no trackers, easy to set up, and does the job.
 1. Click on `use this template`;
 2. Update the `subscriptions.txt` file. Include your list of websites;
 
-Example:
+[Example](./subscriptions.txt):
 ```
 https://blog.laravel.com/feed
 https://blog.mozilla.org/feed/
