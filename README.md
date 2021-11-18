@@ -14,6 +14,15 @@ Free, no trackers, easy to set up, and does the job.
 
 1. Click on `use this template`;
 2. Update the `subscriptions.txt` file. Include your list of websites;
+
+Example:
+```
+https://blog.laravel.com/feed
+https://blog.mozilla.org/feed/
+# https://news.mit.edu/rss/feed (this will be ignored)
+https://labs.spotify.com/feed/
+```
+
 3. Include these environment variables (`GitHub Secrets`):
 
 ```bash
