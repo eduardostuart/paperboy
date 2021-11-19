@@ -39,3 +39,4 @@ https://kerkour.com/feed.xml
 https://jamesclear.com/feed
 https://fasterthanli.me/index.xml
 https://haarlemmermeergemeente.nl/feeds/nieuws.xml
+https://eli.thegreenplace.net/feeds/all.atom.xml
