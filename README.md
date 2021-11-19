@@ -4,7 +4,7 @@
 
 [![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
-Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that delivers new posts from all your favorite sites by email. 
+Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that [delivers](.github/workflows/deliver.yml#L5) new posts from all your favorite sites by email. 
 
 ## Why?
 
