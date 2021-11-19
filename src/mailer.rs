@@ -6,8 +6,8 @@ use lettre::{message::Mailbox, Message, SmtpTransport, Transport};
 #[derive(Debug)]
 pub struct MailerConfig {
     pub from: String,
-    pub credentials: Credentials,
     pub relay: String,
+    pub credentials: Credentials,
 }
 
 #[derive(Debug)]
@@ -20,38 +20,26 @@ impl Mailer {
         Self { config }
     }
 
-    pub fn get_relay(&self) -> &str {
-        &self.config.relay
-    }
-
-    pub fn get_credentials(self) -> Credentials {
-        self.config.credentials
-    }
-
-    pub fn get_from(&self) -> &str {
-        &self.config.from
-    }
-
     pub async fn send(
-        self,
+        &self,
         to: Mailbox,
         subject: String,
         content: String,
     ) -> crate::Result<Response> {
+        let singlepart = SinglePart::builder()
+            .header(header::ContentType::TEXT_HTML)
+            .body(content);
+
         let email = Message::builder()
-            .from(self.get_from().parse::<Mailbox>().unwrap())
+            .from(self.config.from.parse::<Mailbox>().unwrap())
             .to(to)
             .subject(subject)
-            .singlepart(
-                SinglePart::builder()
-                    .header(header::ContentType::TEXT_HTML)
-                    .body(content),
-            )
+            .singlepart(singlepart)
             .unwrap();
 
-        let response = SmtpTransport::relay(self.get_relay())
+        let response = SmtpTransport::relay(&self.config.relay)
             .unwrap()
-            .credentials(self.get_credentials())
+            .credentials(self.config.credentials.clone())
             .build()
             .send(&email)?;
 
