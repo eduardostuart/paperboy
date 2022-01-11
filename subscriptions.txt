@@ -21,7 +21,7 @@ https://instagram-engineering.com/feed
 https://jakearchibald.com/posts.rss
 https://jasonmccreary.me/feed.atom
 https://kentcdodds.com/blog/rss.xml
-https://labs.spotify.com/feed/
+https://engineering.atspotify.com/feed/
 https://m.signalvnoise.com/rss
 https://mattstauffer.com/blog/feed.atom
 https://nadiaeghbal.com/feed
