@@ -1,10 +1,16 @@
 use lettre::message::{header, SinglePart};
-use lettre::transport::smtp::authentication::Credentials;
+use lettre::transport::smtp::authentication::Credentials as LettreSmtpCredentials;
 use lettre::transport::smtp::response::Response;
 use lettre::{message::Mailbox, Message, SmtpTransport, Transport};
 
 #[derive(Debug)]
-pub struct MailerConfig {
+pub struct Credentials {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug)]
+pub struct Config {
     pub from: String,
     pub relay: String,
     pub credentials: Credentials,
@@ -12,11 +18,11 @@ pub struct MailerConfig {
 
 #[derive(Debug)]
 pub struct Mailer {
-    pub config: MailerConfig,
+    pub config: Config,
 }
 
 impl Mailer {
-    pub fn new(config: MailerConfig) -> Self {
+    pub fn new(config: Config) -> Self {
         Self { config }
     }
 
@@ -37,9 +43,14 @@ impl Mailer {
             .singlepart(singlepart)
             .unwrap();
 
+        let credentials = LettreSmtpCredentials::new(
+            self.config.credentials.username.clone(),
+            self.config.credentials.password.clone(),
+        );
+
         let response = SmtpTransport::relay(&self.config.relay)
             .unwrap()
-            .credentials(self.config.credentials.clone())
+            .credentials(credentials)
             .build()
             .send(&email)?;
 

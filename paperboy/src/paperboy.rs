@@ -1,9 +1,9 @@
 use handlebars::{to_json, Handlebars};
-use lettre::{message::Mailbox, transport::smtp::response::Response};
+use lettre::message::Mailbox;
 use serde_json::{Map, Value};
 
 use crate::{
-    mailer::{Mailer, MailerConfig},
+    mailer::{Config as MailerConfig, Mailer},
     rss::Feed,
 };
 
@@ -34,13 +34,22 @@ impl<'a> Paperboy<'a> {
         template.render("main", &data)
     }
 
-    pub async fn deliver(self, items: Vec<Feed>, to: Mailbox) -> crate::Result<Response> {
+    pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
         let body = self.render_template(items).unwrap();
 
-        let result = Mailer::new(self.mailer_config)
-            .send(to, "RSS Daily".to_string(), body)
+        let to_mailbox = to.parse::<Mailbox>()?;
+
+        let response = Mailer::new(self.mailer_config)
+            .send(to_mailbox, "RSS Daily".to_string(), body)
             .await?;
 
-        Ok(result)
+        if !response.is_positive() {
+            Err(crate::error::Error::ErrorSendingMail(format!(
+                "Something went wrong: {}",
+                response.code()
+            )))
+        } else {
+            Ok(())
+        }
     }
 }

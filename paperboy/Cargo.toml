@@ -1,0 +1,27 @@
+[package]
+name = "paperboy"
+version = "0.1.0"
+edition = "2021"
+authors = ["Eduardo Stuart <e@s.tuart.me>"]
+readme = "../README.md"
+homepage = "https://github.com/eduardostuart/paperboy"
+repository = "https://github.com/eduardostuart/paperboy.git"
+description = "Get new posts from all your favorite sites by email."
+license = "MIT"
+documentation = "https://docs.rs/paperboy"
+keywords = ["rss", "feed", "rss-reader"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+futures = "0.3.17"
+feed-rs = "1.0"
+chrono = "0.4"
+handlebars = "4.1.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+lettre = "0.10.0-rc.4"
+
+[dev-dependencies]
+rand = "0.8.4"
