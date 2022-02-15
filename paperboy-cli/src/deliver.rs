@@ -35,7 +35,7 @@ impl<'a> Deliver<'a> {
     }
 
     pub async fn handle(&'a self, to: &'a str, verbose: bool) -> Result<DeliverResult> {
-        let subscriptions = load_subscriptions_from_file(&self.subscription_file);
+        let subscriptions = load_subscriptions_from_file(self.subscription_file);
 
         if verbose {
             println!("Subscriptions loaded: {} urls", subscriptions.len());
@@ -63,7 +63,7 @@ impl<'a> Deliver<'a> {
                 message: "Nothing new for today".to_string(),
             })
         } else {
-            Paperboy::new(&self.template, mailer_config)
+            Paperboy::new(self.template, mailer_config)
                 .deliver(result.unwrap(), to.to_string())
                 .await?;
 

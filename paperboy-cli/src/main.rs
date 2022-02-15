@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
                 None => "emails/daily_email.hbs".to_string(),
             };
 
-            let result = Deliver::new(&SUBSCRIPTIONS_FILE, &template, config)
+            let result = Deliver::new(SUBSCRIPTIONS_FILE, &template, config)
                 .handle(&email, verbose.is_positive())
                 .await?;
 

@@ -1,16 +1,63 @@
 pub mod error;
 
 pub mod mailer;
-mod paperboy;
 mod rss;
 pub mod subscriptions;
 
 /// Alias for a `Result` with the error type `paperboy::error::Error`.
 pub type Result<T, E = error::Error> = std::result::Result<T, E>;
 
+use handlebars::{to_json, Handlebars, JsonValue as Value};
 pub use mailer::{Config, Credentials, Mailer};
-pub use paperboy::Paperboy;
 pub use rss::{Entry, Feed, FeedLoader};
+use serde_json::Map;
+
+const MAIL_SUBJECT: &str = "RSS Daily";
+
+#[derive(Debug)]
+pub struct Paperboy<'a> {
+    template: &'a str,
+    mailer_config: Config,
+}
+
+impl<'a> Paperboy<'a> {
+    pub fn new(template: &'a str, mailer_config: Config) -> Self {
+        Self {
+            template,
+            mailer_config,
+        }
+    }
+
+    pub(self) fn render_template(
+        &self,
+        items: Vec<Feed>,
+    ) -> crate::Result<String, handlebars::RenderError> {
+        let mut template = Handlebars::new();
+        template.register_template_file("main", &self.template)?;
+
+        let mut data: Map<String, Value> = Map::new();
+        data.insert("items".to_string(), to_json(items));
+
+        template.render("main", &data)
+    }
+
+    pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
+        let body = self.render_template(items).unwrap();
+
+        let response = Mailer::new(self.mailer_config)
+            .send(to, MAIL_SUBJECT.to_string(), body)
+            .await?;
+
+        if !response.is_positive() {
+            Err(crate::error::Error::ErrorSendingMail(format!(
+                "Something went wrong: {}",
+                response.code()
+            )))
+        } else {
+            Ok(())
+        }
+    }
+}
 
 #[cfg(test)]
 pub mod test_util {
