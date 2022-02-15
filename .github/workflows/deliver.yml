@@ -13,6 +13,6 @@ jobs:
         env:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          SMTP_RELAY: ${{ secrets.SMTP_RELAY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           MAIL_TO: ${{ secrets.MAIL_TO }}

@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::Serialize;
 use std::ops::Sub;
 
-const HTTPCLIENT_TIMEOUT_SECS: u64 = 5;
+const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
 
 #[derive(Debug, Serialize)]
 pub struct Entry {
@@ -88,6 +88,12 @@ pub struct FeedLoader {
     pub subscriptions: Vec<String>,
 }
 
+#[derive(Debug)]
+pub struct FeedLoadError {
+    pub has_errors: bool,
+    pub errors: Vec<String>,
+}
+
 impl FeedLoader {
     pub fn new(subscriptions: Vec<String>) -> Self {
         FeedLoader {
@@ -96,7 +102,7 @@ impl FeedLoader {
         }
     }
 
-    pub async fn load(&self) -> Option<Vec<Feed>> {
+    pub async fn load(&self) -> Option<(Vec<Feed>, FeedLoadError)> {
         // Create an unordered buffered list of pending futures
         let mut st = stream::iter(&self.subscriptions)
             .map(|url| async move { Feed::new(url.clone()).fetch().await })
@@ -104,6 +110,8 @@ impl FeedLoader {
 
         // Check for each stream item and only return items that have entries
         let mut items = Vec::<Feed>::new();
+        let mut errors = Vec::<String>::new();
+        //
         while let Some(response) = st.next().await {
             match response {
                 Ok(feed) => {
@@ -112,13 +120,19 @@ impl FeedLoader {
                     }
                 }
                 Err(e) => {
-                    println!("error {}", e);
+                    errors.push(e.to_string());
                 }
             };
         }
 
         if !items.is_empty() {
-            Some(items)
+            Some((
+                items,
+                FeedLoadError {
+                    has_errors: !errors.is_empty(),
+                    errors,
+                },
+            ))
         } else {
             None
         }

@@ -4,7 +4,7 @@
 
 [![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
-Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that [delivers](.github/workflows/deliver.yml#L5) new posts from all your favorite sites by email. 
+Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that [delivers](.github/workflows/deliver.yml#L5) new posts from all your favorite sites by email.
 
 ## Why?
 
@@ -16,6 +16,7 @@ Free, no trackers, easy to set up, and does the job.
 2. Update the `subscriptions.txt` file. Include your list of websites;
 
 [Example](./subscriptions.txt):
+
 ```
 https://blog.laravel.com/feed
 https://blog.mozilla.org/feed/
@@ -26,29 +27,30 @@ https://labs.spotify.com/feed/
 3. Include these environment variables (`GitHub Secrets`):
 
 ```bash
-# Which service are you using? fastmail? gmail? sendgrid? ... 
-SMTP_RELAY="smtp.fastmail.com" 
+# Which service are you using? fastmail? gmail? sendgrid? ...
+SMTP_HOST="smtp.fastmail.com"
 
 # Credentials
-SMTP_USERNAME="username" 
-SMTP_PASSWORD="password" 
+SMTP_USERNAME="username"
+SMTP_PASSWORD="password"
 
-# Who will send new posts by email? 
+# Who will send new posts by email?
 # Use "Name <email@domain.com>" format
-SMTP_FROM="Paperboy <rss@your-domain.com>" 
+SMTP_FROM="Paperboy <rss@your-domain.com>"
 
-# The recipient 
+# The recipient
 # Use "Name <email@domain.com>" format
-MAIL_TO="Eduardo <to@your-domain.com>" 
+MAIL_TO="Eduardo <to@your-domain.com>"
 ```
 
 Bonus:
 
 1. **If you want a different template:**
-> Create a new `Handlebars` file in the `emails` folder or update the existing one.
+
+   > Create a new `Handlebars` file in the `emails` folder or update the existing one.
 
 2. **If you want to receive emails multiple times per day or at a different hour of the day**
-> Update the `cron` property inside the workflow `deliver.yml`
+   > Update the `cron` property inside the workflow `deliver.yml`
 
 ## Tests
 
