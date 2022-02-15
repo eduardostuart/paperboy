@@ -46,7 +46,7 @@ paperboy deliver email@domain --verbose
 ## Tests
 
 ```
-cargo run tests
+cargo test
 ```
 
 ## License
