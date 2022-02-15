@@ -4,27 +4,11 @@
 
 [![ci](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardostuart/paperboy/actions/workflows/ci.yml)
 
-Paperboy is a [GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) that [delivers](.github/workflows/deliver.yml#L5) new posts from all your favorite sites by email.
-
-## Why?
-
-Free, no trackers, easy to set up, and does the job.
+Paperboy is a CLI tool that delivers new posts from your favorite sites by email.
 
 ## Usage
 
-1. Click on `use this template`;
-2. Update the `subscriptions.txt` file. Include your list of websites;
-
-[Example](./subscriptions.txt):
-
-```
-https://blog.laravel.com/feed
-https://blog.mozilla.org/feed/
-# https://news.mit.edu/rss/feed (this will be ignored)
-https://labs.spotify.com/feed/
-```
-
-3. Include these environment variables (`GitHub Secrets`):
+Set these environment variable values:
 
 ```bash
 # Which service are you using? fastmail? gmail? sendgrid? ...
@@ -43,14 +27,15 @@ SMTP_FROM="Paperboy <rss@your-domain.com>"
 MAIL_TO="Eduardo <to@your-domain.com>"
 ```
 
-Bonus:
+Deliver command:
 
-1. **If you want a different template:**
+```
+paperboy deliver email@domain --verbose
 
-   > Create a new `Handlebars` file in the `emails` folder or update the existing one.
-
-2. **If you want to receive emails multiple times per day or at a different hour of the day**
-   > Update the `cron` property inside the workflow `deliver.yml`
+# If you want to use a custom email template:
+# paperboy deliver email@domain custom-template.hbs --verbose
+# ^ example/default: ./emails/daily_email.hbs
+```
 
 ## Tests
 
