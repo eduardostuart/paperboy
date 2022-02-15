@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::Serialize;
 use std::ops::Sub;
 
-const HTTPCLIENT_TIMEOUT_SECS: u64 = 5;
+const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
 
 #[derive(Debug, Serialize)]
 pub struct Entry {
@@ -84,13 +84,15 @@ impl Feed {
 
 #[derive(Debug)]
 pub struct FeedLoader {
+    pub verbose: bool,
     pub concurrency: usize,
     pub subscriptions: Vec<String>,
 }
 
 impl FeedLoader {
-    pub fn new(subscriptions: Vec<String>) -> Self {
+    pub fn new(subscriptions: Vec<String>, verbose: bool) -> Self {
         FeedLoader {
+            verbose,
             concurrency: 12,
             subscriptions,
         }
@@ -112,7 +114,9 @@ impl FeedLoader {
                     }
                 }
                 Err(e) => {
-                    println!("error {}", e);
+                    if self.verbose {
+                        println!("error {}", e);
+                    }
                 }
             };
         }

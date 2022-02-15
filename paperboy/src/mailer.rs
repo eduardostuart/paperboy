@@ -12,7 +12,8 @@ pub struct Credentials {
 #[derive(Debug)]
 pub struct Config {
     pub from: String,
-    pub relay: String,
+    pub host: String,
+    pub port: u16,
     pub credentials: Credentials,
 }
 
@@ -28,7 +29,7 @@ impl Mailer {
 
     pub async fn send(
         &self,
-        to: Mailbox,
+        to: String,
         subject: String,
         content: String,
     ) -> crate::Result<Response> {
@@ -38,7 +39,7 @@ impl Mailer {
 
         let email = Message::builder()
             .from(self.config.from.parse::<Mailbox>().unwrap())
-            .to(to)
+            .to(to.parse::<Mailbox>().unwrap())
             .subject(subject)
             .singlepart(singlepart)
             .unwrap();
@@ -48,8 +49,9 @@ impl Mailer {
             self.config.credentials.password.clone(),
         );
 
-        let response = SmtpTransport::relay(&self.config.relay)
+        let response = SmtpTransport::starttls_relay(&self.config.host)
             .unwrap()
+            .port(self.config.port)
             .credentials(credentials)
             .build()
             .send(&email)?;

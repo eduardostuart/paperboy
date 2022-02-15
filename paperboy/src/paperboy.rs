@@ -1,11 +1,12 @@
 use handlebars::{to_json, Handlebars};
-use lettre::message::Mailbox;
 use serde_json::{Map, Value};
 
 use crate::{
     mailer::{Config as MailerConfig, Mailer},
     rss::Feed,
 };
+
+const MAIL_SUBJECT: &str = "RSS Daily";
 
 #[derive(Debug)]
 pub struct Paperboy<'a> {
@@ -37,10 +38,8 @@ impl<'a> Paperboy<'a> {
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
         let body = self.render_template(items).unwrap();
 
-        let to_mailbox = to.parse::<Mailbox>()?;
-
         let response = Mailer::new(self.mailer_config)
-            .send(to_mailbox, "RSS Daily".to_string(), body)
+            .send(to, MAIL_SUBJECT.to_string(), body)
             .await?;
 
         if !response.is_positive() {

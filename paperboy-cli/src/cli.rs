@@ -5,27 +5,32 @@ use clap::Subcommand;
 #[derive(Parser, Debug)]
 #[clap(version, author = "Eduardo Stuart <e@s.tuart.me>", setting = AppSettings::ArgRequiredElseHelp)]
 pub struct Args {
+    #[clap(long, short = 'v', parse(from_occurrences), global = true)]
+    pub verbose: i8,
+
     #[clap(subcommand)]
     pub commands: Commands,
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    Run,
     /// Deliver new posts from all sites by email
     Deliver {
-        email: Option<String>,
+        email: String,
+        /// Custom email template
+        template_file: Option<String>,
     },
-    #[clap(subcommand)]
-    Subscription(SubscriptionCommands),
+    // TODO
+    // #[clap(subcommand)]
+    // Subscription(SubscriptionCommands),
 }
 
-#[derive(Subcommand, Debug)]
-pub enum SubscriptionCommands {
-    /// Add new site into subscriptions
-    Add { url: Option<String> },
-    /// Remove site from subscriptions
-    Remove { url: Option<String> },
-    /// List all subscriptions
-    List,
-}
+// #[derive(Subcommand, Debug)]
+// pub enum SubscriptionCommands {
+//     /// Add new site into subscriptions
+//     Add { url: Option<String> },
+//     /// Remove site from subscriptions
+//     Remove { url: Option<String> },
+//     /// List all subscriptions
+//     List,
+// }

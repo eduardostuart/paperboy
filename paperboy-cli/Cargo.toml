@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "3.0.14", features = ["derive"] }
-cli-table = "0.4"
 paperboy = { path = "../paperboy"}
 tokio = { version = "1.13.1", features = ["full"] }
 
