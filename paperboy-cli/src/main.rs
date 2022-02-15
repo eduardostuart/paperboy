@@ -20,22 +20,15 @@ async fn main() -> Result<()> {
 
     match matches.commands {
         // Deliver RSS by email
-        Commands::Deliver {
-            email,
-            template_file,
-        } => {
-            deliver_rss_by_email(email, template_file, matches.verbose.is_positive()).await?;
+        Commands::Deliver { email, template } => {
+            deliver_rss_by_email(email, template, matches.verbose.is_positive()).await?;
         }
     };
 
     Ok(())
 }
 
-async fn deliver_rss_by_email(
-    email: String,
-    template_file: Option<String>,
-    verbose: bool,
-) -> Result<()> {
+async fn deliver_rss_by_email(email: String, template: String, verbose: bool) -> Result<()> {
     let smtp_port = match option_env!("SMTP_PORT") {
         Some(p) => p.parse::<u16>().unwrap(),
         None => 25,
@@ -47,11 +40,6 @@ async fn deliver_rss_by_email(
         smtp_password: &get_env_key("SMTP_PASSWORD", "SMTP password is not defined"),
         smtp_username: &get_env_key("SMTP_USERNAME", "SMTP username is not defined"),
         smtp_port: &smtp_port,
-    };
-
-    let template = match template_file {
-        Some(v) => v,
-        None => "emails/daily_email.hbs".to_string(),
     };
 
     let result = Deliver::new(SUBSCRIPTIONS_FILE, &template, config)

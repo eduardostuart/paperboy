@@ -17,8 +17,8 @@ pub enum Commands {
     /// Deliver new posts from all sites by email
     Deliver {
         email: String,
-        /// Custom email template
-        template_file: Option<String>,
+        /// Email template
+        template: String,
     },
     // TODO
     // #[clap(subcommand)]
