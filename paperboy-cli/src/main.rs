@@ -1,4 +1,4 @@
-use std::process;
+use std::{fs::File, path::Path, process};
 
 use crate::{cli::Args, deliver::MailConfig};
 use clap::StructOpt;
@@ -14,6 +14,8 @@ const SUBSCRIPTIONS_FILE: &str = "subscriptions.txt";
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    check_for_subscriptions_file();
+
     let matches = Args::parse();
 
     let verbose = matches.verbose;
@@ -55,6 +57,12 @@ async fn main() -> Result<()> {
     };
 
     Ok(())
+}
+
+fn check_for_subscriptions_file() {
+    if !Path::new(SUBSCRIPTIONS_FILE).exists() {
+        File::create(SUBSCRIPTIONS_FILE).expect("Error while creating subscriptions file");
+    }
 }
 
 fn get_env_key(key: &str, error: &str) -> String {
