@@ -6,6 +6,12 @@
 
 Paperboy is a CLI tool that delivers new posts from your favorite sites by email.
 
+## Installation
+
+**From binaries**
+
+Check out the [release page](https://github.com/eduardostuart/paperboy/releases/) for prebuilt versions of `Paperboy`.
+
 ## Usage
 
 Set these environment variable values:
@@ -29,7 +35,7 @@ MAIL_TO="Eduardo <to@your-domain.com>"
 
 Deliver command:
 
-```
+```bash
 paperboy deliver email@domain --verbose
 
 # If you want to use a custom email template:
