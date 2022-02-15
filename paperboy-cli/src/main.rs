@@ -48,11 +48,17 @@ async fn main() -> Result<()> {
                 None => "emails/daily_email.hbs".to_string(),
             };
 
+            let wants_verbose = verbose.is_positive();
+
             let result = Deliver::new(SUBSCRIPTIONS_FILE, &template, config)
-                .handle(&email, verbose.is_positive())
+                .handle(&email, wants_verbose)
                 .await?;
 
             println!("Result: {:?}", result.message);
+
+            if result.errors.is_some() && wants_verbose {
+                println!("Errors: {:?}", result.errors.unwrap());
+            }
         }
     };
 

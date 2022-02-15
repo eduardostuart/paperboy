@@ -9,7 +9,7 @@ pub type Result<T, E = error::Error> = std::result::Result<T, E>;
 
 use handlebars::{to_json, Handlebars, JsonValue as Value};
 pub use mailer::{Config, Credentials, Mailer};
-pub use rss::{Entry, Feed, FeedLoader};
+pub use rss::{Entry, Feed, FeedLoadError, FeedLoader};
 use serde_json::Map;
 
 const MAIL_SUBJECT: &str = "RSS Daily";

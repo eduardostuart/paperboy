@@ -23,6 +23,7 @@ pub struct Deliver<'a> {
 pub struct DeliverResult {
     pub delivered: bool,
     pub message: String,
+    pub errors: Option<Vec<String>>,
 }
 
 impl<'a> Deliver<'a> {
@@ -55,22 +56,29 @@ impl<'a> Deliver<'a> {
             println!("Fetching latest posts from all subscriptions...");
         }
 
-        let result = FeedLoader::new(subscriptions, verbose).load().await;
+        match FeedLoader::new(subscriptions).load().await {
+            Some((items, error_result)) => {
+                Paperboy::new(self.template, mailer_config)
+                    .deliver(items, to.to_string())
+                    .await?;
 
-        if result.is_none() {
-            Ok(DeliverResult {
+                let errors = if error_result.has_errors {
+                    Some(error_result.errors)
+                } else {
+                    None
+                };
+
+                Ok(DeliverResult {
+                    delivered: true,
+                    message: "OK".to_string(),
+                    errors,
+                })
+            }
+            None => Ok(DeliverResult {
                 delivered: false,
                 message: "Nothing new for today".to_string(),
-            })
-        } else {
-            Paperboy::new(self.template, mailer_config)
-                .deliver(result.unwrap(), to.to_string())
-                .await?;
-
-            Ok(DeliverResult {
-                delivered: true,
-                message: "OK".to_string(),
-            })
+                errors: None,
+            }),
         }
     }
 }
