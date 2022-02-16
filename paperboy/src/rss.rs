@@ -5,6 +5,7 @@ use serde::Serialize;
 use std::ops::Sub;
 
 const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
+const HTTPCLIENT_CONNECTION_TIMEOUT_SECS: u64 = 3;
 
 #[derive(Debug, Serialize)]
 pub struct Entry {
@@ -40,6 +41,9 @@ impl Feed {
     pub async fn fetch(&self) -> crate::Result<Feed> {
         let content = Client::builder()
             .timeout(std::time::Duration::from_secs(HTTPCLIENT_TIMEOUT_SECS))
+            .connect_timeout(std::time::Duration::from_secs(
+                HTTPCLIENT_CONNECTION_TIMEOUT_SECS,
+            ))
             .build()?
             .get(&self.url)
             .send()
@@ -111,7 +115,7 @@ impl FeedLoader {
         // Check for each stream item and only return items that have entries
         let mut items = Vec::<Feed>::new();
         let mut errors = Vec::<String>::new();
-        //
+
         while let Some(response) = st.next().await {
             match response {
                 Ok(feed) => {
