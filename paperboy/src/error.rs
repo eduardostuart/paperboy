@@ -13,8 +13,7 @@ pub enum Error {
     IO(io::Error),
     /// Error while sending email
     MailTransport(String),
-    /// Invalid email address
-    AddressError(String),
+    SmtpError(String),
 }
 
 impl From<reqwest::Error> for Error {
@@ -29,15 +28,15 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<lettre::transport::smtp::Error> for Error {
-    fn from(e: lettre::transport::smtp::Error) -> Self {
+impl From<lettre::error::Error> for Error {
+    fn from(e: lettre::error::Error) -> Self {
         Self::MailTransport(e.to_string())
     }
 }
 
-impl From<lettre::address::AddressError> for Error {
-    fn from(e: lettre::address::AddressError) -> Self {
-        Self::AddressError(e.to_string())
+impl From<lettre::smtp::error::Error> for Error {
+    fn from(e: lettre::smtp::error::Error) -> Self {
+        Self::SmtpError(e.to_string())
     }
 }
 
@@ -48,8 +47,8 @@ impl fmt::Display for Error {
             Self::CouldNotParseRSSFromUrl(ref e) => write!(f, "{}", e),
             Self::IO(ref e) => write!(f, "{}", e),
             Self::MailTransport(ref e) => write!(f, "{}", e),
-            Self::AddressError(ref e) => write!(f, "{}", e),
             Self::ErrorSendingMail(ref e) => write!(f, "{}", e),
+            Self::SmtpError(ref e) => write!(f, "{}", e),
         }
     }
 }

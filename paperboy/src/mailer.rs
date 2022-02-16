@@ -1,7 +1,9 @@
-use lettre::message::{header, SinglePart};
-use lettre::transport::smtp::authentication::Credentials as LettreSmtpCredentials;
-use lettre::transport::smtp::response::Response;
-use lettre::{message::Mailbox, Message, SmtpTransport, Transport};
+use lettre::smtp::authentication::Credentials as LettreCredentials;
+use lettre::smtp::response::Response;
+use lettre::SmtpClient;
+use lettre::Transport;
+use lettre_email::EmailBuilder;
+use lettre_email::Mailbox;
 
 #[derive(Debug)]
 pub struct Credentials {
@@ -33,30 +35,23 @@ impl Mailer {
         subject: String,
         content: String,
     ) -> crate::Result<Response> {
-        let singlepart = SinglePart::builder()
-            .header(header::ContentType::TEXT_HTML)
-            .body(content);
-
-        let email = Message::builder()
-            .from(self.config.from.parse::<Mailbox>().unwrap())
-            .to(to.parse::<Mailbox>().unwrap())
-            .subject(subject)
-            .singlepart(singlepart)
-            .unwrap();
-
-        let credentials = LettreSmtpCredentials::new(
-            self.config.credentials.username.clone(),
-            self.config.credentials.password.clone(),
-        );
-
-        let response = SmtpTransport::relay(&self.config.host)
+        let mut transport = SmtpClient::new_simple(&*self.config.host)
             .unwrap()
-            .timeout(Some(std::time::Duration::from_secs(5)))
-            .port(self.config.port)
-            .credentials(credentials)
-            .build()
-            .send(&email)?;
+            .credentials(LettreCredentials::new(
+                self.config.credentials.username.clone(),
+                self.config.credentials.password.clone(),
+            ))
+            .transport();
 
-        Ok(response)
+        Ok(transport.send(
+            EmailBuilder::new()
+                .from(self.config.from.parse::<Mailbox>().unwrap())
+                .to(to.parse::<Mailbox>().unwrap())
+                .subject(subject)
+                .html(content)
+                .build()
+                .unwrap()
+                .into(),
+        )?)
     }
 }
