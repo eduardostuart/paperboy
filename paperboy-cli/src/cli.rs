@@ -14,10 +14,11 @@ pub struct Args {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Deliver new posts from all sites by email
+    /// Deliver new posts from sites by email
     Deliver {
+        /// The recipient
         email: String,
-        /// Email template
+        /// Email template (Using handlebars)
         template: String,
     },
     // TODO
