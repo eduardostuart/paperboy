@@ -20,6 +20,9 @@ Set these environment variable values:
 # Which service are you using? fastmail? gmail? sendgrid? ...
 SMTP_HOST="smtp.fastmail.com"
 
+# Port
+SMTP_PORT=465
+
 # Credentials
 SMTP_USERNAME="username"
 SMTP_PASSWORD="password"
