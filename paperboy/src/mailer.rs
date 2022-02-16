@@ -51,6 +51,7 @@ impl Mailer {
 
         let response = SmtpTransport::relay(&self.config.host)
             .unwrap()
+            .timeout(Some(std::time::Duration::from_secs(5)))
             .port(self.config.port)
             .credentials(credentials)
             .build()
