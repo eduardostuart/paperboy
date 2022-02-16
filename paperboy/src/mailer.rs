@@ -49,7 +49,7 @@ impl Mailer {
             self.config.credentials.password.clone(),
         );
 
-        let response = SmtpTransport::starttls_relay(&self.config.host)
+        let response = SmtpTransport::relay(&self.config.host)
             .unwrap()
             .port(self.config.port)
             .credentials(credentials)
