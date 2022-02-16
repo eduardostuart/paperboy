@@ -17,33 +17,18 @@ Check out the [release page](https://github.com/eduardostuart/paperboy/releases/
 Set these environment variable values:
 
 ```bash
-# Which service are you using? fastmail? gmail? sendgrid? ...
-SMTP_HOST="smtp.fastmail.com"
-
-# Port
-SMTP_PORT=465
-
-# Credentials
+SMTP_HOST="smtp.fastmail.com" # Which service are you using? fastmail? gmail? sendgrid? ...
+SMTP_PORT=465 # 25 is the default port
 SMTP_USERNAME="username"
 SMTP_PASSWORD="password"
-
-# Who will send new posts by email?
-# Use "Name <email@domain.com>" format
-SMTP_FROM="Paperboy <rss@your-domain.com>"
-
-# The recipient
-# Use "Name <email@domain.com>" format
-MAIL_TO="Eduardo <to@your-domain.com>"
+SMTP_FROM="Paperboy <rss@your-domain.com>" # Who will send new posts by email?
 ```
 
 Deliver command:
 
 ```bash
-paperboy deliver email@domain --verbose
-
-# If you want to use a custom email template:
-# paperboy deliver email@domain custom-template.hbs --verbose
-# ^ example/default: ./emails/daily_email.hbs
+paperboy deliver email@domain template.hbs --verbose
+# Template example.: emails/daily_email.hbs
 ```
 
 ## Tests
