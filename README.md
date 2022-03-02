@@ -27,7 +27,7 @@ SMTP_FROM="Paperboy <rss@your-domain.com>" # Who will send new posts by email?
 Deliver command:
 
 ```bash
-paperboy deliver email@domain template.hbs --verbose
+paperboy deliver email@domain subscriptions.txt template.hbs
 # Template example.: emails/daily_email.hbs
 ```
 
