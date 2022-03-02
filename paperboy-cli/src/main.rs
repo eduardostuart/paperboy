@@ -1,4 +1,4 @@
-use std::{fs::File, path::Path, process};
+use std::{path::Path, process};
 
 use crate::{cli::Args, deliver::MailConfig};
 use clap::StructOpt;
@@ -10,39 +10,61 @@ mod deliver;
 
 use deliver::Deliver;
 
-const SUBSCRIPTIONS_FILE: &str = "subscriptions.txt";
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    check_for_subscriptions_file();
-
     let matches = Args::parse();
 
     match matches.commands {
         // Deliver RSS by email
-        Commands::Deliver { email, template } => {
-            deliver_rss_by_email(email, template, matches.verbose.is_positive()).await?;
+        Commands::Deliver {
+            email,
+            subscription_file,
+            template,
+        } => {
+            if !Path::new(&subscription_file).is_file() {
+                eprint!("Subscription file {} does not exist", subscription_file);
+                std::process::exit(1);
+            }
+
+            deliver_rss_by_email(
+                email,
+                subscription_file,
+                template,
+                matches.verbose.is_positive(),
+            )
+            .await?;
         }
     };
 
     Ok(())
 }
 
-async fn deliver_rss_by_email(email: String, template: String, verbose: bool) -> Result<()> {
+async fn deliver_rss_by_email(
+    email: String,
+    subscription_file: String,
+    template: String,
+    verbose: bool,
+) -> Result<()> {
     let smtp_port = match option_env!("SMTP_PORT") {
         Some(p) => p.parse::<u16>().unwrap(),
         None => 25,
     };
 
     let config = MailConfig {
-        smtp_from: &get_env_key("SMTP_FROM", "SMTP is not defined"),
-        smtp_host: &get_env_key("SMTP_HOST", "SMTP host is not defined"),
-        smtp_password: &get_env_key("SMTP_PASSWORD", "SMTP password is not defined"),
-        smtp_username: &get_env_key("SMTP_USERNAME", "SMTP username is not defined"),
+        smtp_from: &get_env_key("SMTP_FROM", "SMTP_FROM environment variable is not defined"),
+        smtp_host: &get_env_key("SMTP_HOST", "SMTP_HOST environment variable is not defined"),
+        smtp_password: &get_env_key(
+            "SMTP_PASSWORD",
+            "SMTP_PASSWORD environment variable is not defined",
+        ),
+        smtp_username: &get_env_key(
+            "SMTP_USERNAME",
+            "SMTP_USERNAME environment variable is not defined",
+        ),
         smtp_port: &smtp_port,
     };
 
-    let result = Deliver::new(SUBSCRIPTIONS_FILE, &template, config)
+    let result = Deliver::new(&subscription_file, &template, config)
         .handle(&email, verbose)
         .await?;
 
@@ -53,12 +75,6 @@ async fn deliver_rss_by_email(email: String, template: String, verbose: bool) ->
     }
 
     Ok(())
-}
-
-fn check_for_subscriptions_file() {
-    if !Path::new(SUBSCRIPTIONS_FILE).exists() {
-        File::create(SUBSCRIPTIONS_FILE).expect("Error while creating subscriptions file");
-    }
 }
 
 fn get_env_key(key: &str, error: &str) -> String {

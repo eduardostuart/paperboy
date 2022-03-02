@@ -18,6 +18,8 @@ pub enum Commands {
     Deliver {
         /// The recipient
         email: String,
+        /// Subscription file
+        subscription_file: String,
         /// Email template (Using handlebars)
         template: String,
     },
