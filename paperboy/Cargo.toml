@@ -1,6 +1,6 @@
 [package]
 name = "paperboy"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Eduardo Stuart <e@s.tuart.me>"]
 readme = "../README.md"
