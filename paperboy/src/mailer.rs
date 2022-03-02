@@ -1,9 +1,11 @@
-use lettre::smtp::authentication::Credentials as LettreCredentials;
-use lettre::smtp::response::Response;
-use lettre::SmtpClient;
+use lettre::message::header;
+use lettre::message::MultiPart;
+use lettre::message::SinglePart;
+use lettre::transport::smtp::authentication::Credentials as LettreCredentials;
+use lettre::transport::smtp::response::Response;
+use lettre::Message;
+use lettre::SmtpTransport;
 use lettre::Transport;
-use lettre_email::EmailBuilder;
-use lettre_email::Mailbox;
 
 #[derive(Debug)]
 pub struct Credentials {
@@ -35,23 +37,27 @@ impl Mailer {
         subject: String,
         content: String,
     ) -> crate::Result<Response> {
-        let mut transport = SmtpClient::new_simple(&*self.config.host)
+        let email = Message::builder()
+            .from(self.config.from.parse().unwrap())
+            .to(to.parse().unwrap())
+            .subject(subject)
+            .multipart(
+                MultiPart::alternative().singlepart(
+                    SinglePart::builder()
+                        .header(header::ContentType::TEXT_HTML)
+                        .body(content),
+                ),
+            )
+            .unwrap();
+
+        let transport = SmtpTransport::starttls_relay(&*self.config.host)
             .unwrap()
             .credentials(LettreCredentials::new(
                 self.config.credentials.username.clone(),
                 self.config.credentials.password.clone(),
             ))
-            .transport();
+            .build();
 
-        Ok(transport.send(
-            EmailBuilder::new()
-                .from(self.config.from.parse::<Mailbox>().unwrap())
-                .to(to.parse::<Mailbox>().unwrap())
-                .subject(subject)
-                .html(content)
-                .build()
-                .unwrap()
-                .into(),
-        )?)
+        Ok(transport.send(&email)?)
     }
 }

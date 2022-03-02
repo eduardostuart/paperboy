@@ -51,7 +51,7 @@ impl<'a> Paperboy<'a> {
         if !response.is_positive() {
             Err(crate::error::Error::ErrorSendingMail(format!(
                 "Something went wrong: {}",
-                response.code
+                response.code()
             )))
         } else {
             Ok(())
