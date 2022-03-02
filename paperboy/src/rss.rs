@@ -104,10 +104,7 @@ impl FeedLoader {
 
     pub async fn load(&self) -> Option<(Vec<Feed>, FeedLoadError)> {
         let mut futures = futures::stream::iter(self.subscriptions.to_owned())
-            .map(|url| {
-                let url_clone = url.clone();
-                tokio::spawn(async move { Feed::new(url_clone).fetch().await })
-            })
+            .map(|url| tokio::spawn(async move { Feed::new(url).fetch().await }))
             .buffer_unordered(10);
 
         let mut items = Vec::new();
