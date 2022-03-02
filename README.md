@@ -31,6 +31,10 @@ paperboy deliver email@domain subscriptions.txt template.hbs
 # Template example.: emails/daily_email.hbs
 ```
 
+## GitHub template
+
+If you want an **automatic** and **free** way to receive daily "newspapers" using `paperboy`, take a look at the [paperboy-template](https://github.com/eduardostuart/paperboy-template) GitHub project.
+
 ## Tests
 
 ```
