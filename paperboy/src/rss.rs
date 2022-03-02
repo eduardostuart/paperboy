@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use futures::{stream, StreamExt};
+use futures::StreamExt;
 use reqwest::Client;
 use serde::Serialize;
 use std::ops::Sub;
@@ -7,7 +7,7 @@ use std::ops::Sub;
 const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
 const HTTPCLIENT_CONNECTION_TIMEOUT_SECS: u64 = 3;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Entry {
     pub title: String,
     pub url: String,
@@ -38,7 +38,7 @@ impl Feed {
         }
     }
 
-    pub async fn fetch(&self) -> crate::Result<Feed> {
+    pub async fn fetch(self) -> crate::Result<Feed> {
         let content = Client::builder()
             .timeout(std::time::Duration::from_secs(HTTPCLIENT_TIMEOUT_SECS))
             .connect_timeout(std::time::Duration::from_secs(
@@ -52,10 +52,10 @@ impl Feed {
             .await?;
 
         match feed_rs::parser::parse(&content[..]) {
-            Ok(result) => Ok(Self {
+            Ok(result) => Ok(Feed {
                 url: String::from(&self.url),
                 title: result.title.unwrap().content,
-                entries: self.filter_items_from_yesterday(result.entries),
+                entries: self.filter_items_from_yesterday(result.entries).to_vec(),
             }),
             Err(e) => {
                 return Err(crate::error::Error::CouldNotParseRSSFromUrl(format!(
@@ -88,7 +88,6 @@ impl Feed {
 
 #[derive(Debug)]
 pub struct FeedLoader {
-    pub concurrency: usize,
     pub subscriptions: Vec<String>,
 }
 
@@ -100,33 +99,34 @@ pub struct FeedLoadError {
 
 impl FeedLoader {
     pub fn new(subscriptions: Vec<String>) -> Self {
-        FeedLoader {
-            concurrency: 12,
-            subscriptions,
-        }
+        FeedLoader { subscriptions }
     }
 
     pub async fn load(&self) -> Option<(Vec<Feed>, FeedLoadError)> {
-        // Create an unordered buffered list of pending futures
-        let mut st = stream::iter(&self.subscriptions)
-            .map(|url| async move { Feed::new(url.clone()).fetch().await })
-            .buffer_unordered(self.concurrency);
+        let mut futures = futures::stream::iter(self.subscriptions.to_owned())
+            .map(|url| {
+                let url_clone = url.clone();
+                tokio::spawn(async move { Feed::new(url_clone).fetch().await })
+            })
+            .buffer_unordered(10);
 
-        // Check for each stream item and only return items that have entries
-        let mut items = Vec::<Feed>::new();
-        let mut errors = Vec::<String>::new();
+        let mut items = Vec::new();
+        let mut errors = Vec::new();
 
-        while let Some(response) = st.next().await {
-            match response {
-                Ok(feed) => {
+        while let Some(f) = futures.next().await {
+            match f {
+                Ok(Ok(feed)) => {
                     if !feed.entries.is_empty() {
-                        items.push(feed)
+                        items.push(feed);
                     }
+                }
+                Ok(Err(e)) => {
+                    errors.push(e.to_string());
                 }
                 Err(e) => {
                     errors.push(e.to_string());
                 }
-            };
+            }
         }
 
         if !items.is_empty() {
