@@ -1,13 +1,17 @@
 use std::fs::read_to_string;
 
 pub fn load_from_file(file: &str) -> Vec<String> {
+    log::info!("Loading subscriptions file {}", &file);
+
     read_to_string(file)
         .unwrap()
         .lines()
         .filter_map(|s| {
             if s.trim().is_empty() || s.starts_with('#') {
+                log::info!("Ignoring subscription entry: {}", &s);
                 None
             } else {
+                log::info!("Subscription entry: {}", &s);
                 Some(String::from(s.trim()))
             }
         })

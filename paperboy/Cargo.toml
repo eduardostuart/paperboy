@@ -1,6 +1,6 @@
 [package]
 name = "paperboy"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Eduardo Stuart <e@s.tuart.me>"]
 readme = "../README.md"
@@ -23,6 +23,7 @@ chrono = "0.4"
 handlebars = "4.1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+log = "0.4.14"
 
 [dev-dependencies]
 rand = "0.8.4"

@@ -39,6 +39,8 @@ impl Feed {
     }
 
     pub async fn fetch(self) -> crate::Result<Feed> {
+        log::debug!("Fetching url {}", &self.url);
+
         let content = Client::builder()
             .timeout(std::time::Duration::from_secs(HTTPCLIENT_TIMEOUT_SECS))
             .connect_timeout(std::time::Duration::from_secs(
@@ -52,12 +54,16 @@ impl Feed {
             .await?;
 
         match feed_rs::parser::parse(&content[..]) {
-            Ok(result) => Ok(Feed {
-                url: String::from(&self.url),
-                title: result.title.unwrap().content,
-                entries: self.filter_items_from_yesterday(result.entries).to_vec(),
-            }),
+            Ok(result) => {
+                log::debug!("Fetch Result {:?}", result);
+                Ok(Feed {
+                    url: String::from(&self.url),
+                    title: result.title.unwrap().content,
+                    entries: self.filter_items_from_yesterday(result.entries).to_vec(),
+                })
+            }
             Err(e) => {
+                log::debug!("Fetch result error {}", e);
                 return Err(crate::error::Error::CouldNotParseRSSFromUrl(format!(
                     "{}: {}",
                     self.url,
@@ -72,6 +78,7 @@ impl Feed {
         entries: Vec<feed_rs::model::Entry>,
     ) -> Vec<Entry> {
         let yesterday = Utc::now().sub(Duration::days(1));
+        log::trace!("Filtering items from yesterday {}", yesterday);
         entries
             .into_iter()
             .filter(|e| match e.published {
@@ -103,6 +110,8 @@ impl FeedLoader {
     }
 
     pub async fn load(&self) -> Option<(Vec<Feed>, FeedLoadError)> {
+        log::trace!("Loading {} subscriptions", self.subscriptions.len());
+
         let mut futures = futures::stream::iter(self.subscriptions.to_owned())
             .map(|url| tokio::spawn(async move { Feed::new(url).fetch().await }))
             .buffer_unordered(10);
@@ -113,14 +122,18 @@ impl FeedLoader {
         while let Some(f) = futures.next().await {
             match f {
                 Ok(Ok(feed)) => {
+                    log::debug!("Feed {} has {} items", feed.url, feed.entries.len());
+
                     if !feed.entries.is_empty() {
                         items.push(feed);
                     }
                 }
                 Ok(Err(e)) => {
+                    log::error!("Error while loading feed {}", e);
                     errors.push(e.to_string());
                 }
                 Err(e) => {
+                    log::error!("Error {}", e);
                     errors.push(e.to_string());
                 }
             }
@@ -135,6 +148,7 @@ impl FeedLoader {
                 },
             ))
         } else {
+            log::debug!("There are no new entries");
             None
         }
     }
