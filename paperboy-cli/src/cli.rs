@@ -5,8 +5,8 @@ use clap::Subcommand;
 #[derive(Parser, Debug)]
 #[clap(version, author = "Eduardo Stuart <e@s.tuart.me>", setting = AppSettings::ArgRequiredElseHelp)]
 pub struct Args {
-    #[clap(long, short = 'v', parse(from_occurrences), global = true)]
-    pub verbose: i8,
+    #[clap(flatten)]
+    pub verbose: clap_verbosity_flag::Verbosity,
 
     #[clap(subcommand)]
     pub commands: Commands,

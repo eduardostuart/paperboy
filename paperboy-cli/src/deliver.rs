@@ -35,12 +35,10 @@ impl<'a> Deliver<'a> {
         }
     }
 
-    pub async fn handle(&'a self, to: &'a str, verbose: bool) -> Result<DeliverResult> {
+    pub async fn handle(&'a self, to: &'a str) -> Result<DeliverResult> {
         let subscriptions = load_subscriptions_from_file(self.subscription_file);
 
-        if verbose {
-            println!("Subscriptions loaded: {} urls", subscriptions.len());
-        }
+        log::info!("{} subscriptions loaded", subscriptions.len());
 
         let mailer_config = Config {
             from: self.mail_config.smtp_from.to_string(),
@@ -52,9 +50,7 @@ impl<'a> Deliver<'a> {
             port: *self.mail_config.smtp_port,
         };
 
-        if verbose {
-            println!("Fetching latest posts from all subscriptions...");
-        }
+        log::debug!("Fetching latest posts from all subscriptions...");
 
         match FeedLoader::new(subscriptions).load().await {
             Some((items, error_result)) => {
