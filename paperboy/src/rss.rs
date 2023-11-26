@@ -48,6 +48,15 @@ impl Feed {
             ))
             .build()?
             .get(&self.url)
+            // See: https://stackoverflow.com/a/7001617/5155484
+            .header(
+                "Accept",
+                "application/rss+xml, application/rdf+xml, application/atom+xml, application/feed+json, application/xml;q=0.9, text/xml;q=0.8"
+            )
+            .header(
+                "User-Agent",
+                "Paperboy (https://github.com/eduardostuart/paperboy)"
+            )
             .send()
             .await?
             .bytes()
