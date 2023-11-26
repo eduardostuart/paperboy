@@ -14,24 +14,27 @@ use serde_json::Map;
 
 #[derive(Debug)]
 pub struct Paperboy<'a> {
-    template: &'a str,
+    template_html: &'a str,
+    template_text: Option<&'a str>,
     mailer_config: Config,
 }
 
 impl<'a> Paperboy<'a> {
-    pub fn new(template: &'a str, mailer_config: Config) -> Self {
+    pub fn new(template_html: &'a str, template_text: Option<&'a str>, mailer_config: Config) -> Self {
         Self {
-            template,
+            template_html,
+            template_text,
             mailer_config,
         }
     }
 
     pub(self) fn render_template(
         &self,
-        items: Vec<Feed>,
+        items: &Vec<Feed>,
+        template_path: &str,
     ) -> crate::Result<String, handlebars::RenderError> {
         let mut template = Handlebars::new();
-        template.register_template_file("main", &self.template)?;
+        template.register_template_file("main", template_path)?;
 
         let mut data: Map<String, Value> = Map::new();
         data.insert("items".to_string(), to_json(items));
@@ -40,11 +43,15 @@ impl<'a> Paperboy<'a> {
     }
 
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
-        let body = self.render_template(items).unwrap();
+        let body_html = self.render_template(&items, self.template_html).unwrap();
+        let body_text = match self.template_text {
+            Some (template) => Some(self.render_template(&items, template).unwrap()),
+            None => None,
+        };
 
         let subject = self.mailer_config.subject.clone();
         let response = Mailer::new(self.mailer_config)
-            .send(to, subject, body)
+            .send(to, subject, body_html, body_text)
             .await?;
 
         if !response.is_positive() {

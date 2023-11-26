@@ -36,19 +36,33 @@ impl Mailer {
         &self,
         to: String,
         subject: String,
-        content: String,
+        content_as_html: String,
+        content_as_text: Option<String>,
     ) -> crate::Result<Response> {
+        let parts = match content_as_text {
+            Some(content_as_text) => MultiPart::alternative()
+                .singlepart(
+                    SinglePart::builder()
+                        .header(header::ContentType::TEXT_PLAIN)
+                        .body(content_as_text),
+                ).singlepart(
+                    SinglePart::builder()
+                        .header(header::ContentType::TEXT_HTML)
+                        .body(content_as_html),
+                ),
+            None => MultiPart::alternative()
+                .singlepart(
+                    SinglePart::builder()
+                        .header(header::ContentType::TEXT_HTML)
+                        .body(content_as_html),
+                )
+        };
+
         let email = Message::builder()
             .from(self.config.from.parse().unwrap())
             .to(to.parse().unwrap())
             .subject(subject)
-            .multipart(
-                MultiPart::alternative().singlepart(
-                    SinglePart::builder()
-                        .header(header::ContentType::TEXT_HTML)
-                        .body(content),
-                ),
-            )
+            .multipart(parts)
             .unwrap();
 
         let transport = SmtpTransport::starttls_relay(&*self.config.host)

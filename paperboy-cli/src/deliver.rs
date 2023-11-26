@@ -16,7 +16,8 @@ pub struct MailConfig<'a> {
 #[derive(Debug)]
 pub struct Deliver<'a> {
     pub subscription_file: &'a str,
-    pub template: &'a str,
+    pub template_html: &'a str,
+    pub template_text: Option<&'a str>,
     pub mail_config: MailConfig<'a>,
 }
 
@@ -28,9 +29,10 @@ pub struct DeliverResult {
 }
 
 impl<'a> Deliver<'a> {
-    pub fn new(subscription_file: &'a str, template: &'a str, mail_config: MailConfig<'a>) -> Self {
+    pub fn new(subscription_file: &'a str, template_html: &'a str, template_text: Option<&'a str>, mail_config: MailConfig<'a>) -> Self {
         Self {
-            template,
+            template_html,
+            template_text,
             subscription_file,
             mail_config,
         }
@@ -56,7 +58,7 @@ impl<'a> Deliver<'a> {
 
         match FeedLoader::new(subscriptions).load().await {
             Some((items, error_result)) => {
-                Paperboy::new(self.template, mailer_config)
+                Paperboy::new(self.template_html, self.template_text, mailer_config)
                     .deliver(items, to.to_string())
                     .await?;
 
