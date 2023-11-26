@@ -22,6 +22,7 @@ SMTP_PORT=465 # 25 is the default port
 SMTP_USERNAME="username"
 SMTP_PASSWORD="password"
 SMTP_FROM="Paperboy <rss@your-domain.com>" # Who will send new posts by email?
+EMAIL_SUBJECT="RSS news by Paperboy"
 ```
 
 Deliver command:
