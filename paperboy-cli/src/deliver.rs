@@ -5,6 +5,7 @@ use paperboy::{
 
 #[derive(Debug)]
 pub struct MailConfig<'a> {
+    pub mail_subject: &'a str,
     pub smtp_from: &'a str,
     pub smtp_username: &'a str,
     pub smtp_password: &'a str,
@@ -41,6 +42,7 @@ impl<'a> Deliver<'a> {
         log::info!("{} subscriptions loaded", subscriptions.len());
 
         let mailer_config = Config {
+            subject: self.mail_config.mail_subject.to_string(),
             from: self.mail_config.smtp_from.to_string(),
             credentials: Credentials {
                 username: self.mail_config.smtp_username.to_string(),

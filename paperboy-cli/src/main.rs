@@ -55,20 +55,29 @@ async fn deliver_rss_by_email(
     };
 
     let config = MailConfig {
+        mail_subject: &get_env_key(
+            "EMAIL_SUBJECT",
+            Some("RSS Daily"),
+            "[Error] - EMAIL_SUBJECT environment variable is not well formed",
+        ),
         smtp_from: &get_env_key(
             "SMTP_FROM",
+            None,
             "[Error] - SMTP_FROM environment variable is not defined",
         ),
         smtp_host: &get_env_key(
             "SMTP_HOST",
+            None,
             "[Error] - SMTP_HOST environment variable is not defined",
         ),
         smtp_password: &get_env_key(
             "SMTP_PASSWORD",
+            None,
             "[Error] - SMTP_PASSWORD environment variable is not defined",
         ),
         smtp_username: &get_env_key(
             "SMTP_USERNAME",
+            None,
             "[Error] - SMTP_USERNAME environment variable is not defined",
         ),
         smtp_port: &smtp_port,
@@ -88,12 +97,28 @@ async fn deliver_rss_by_email(
     Ok(())
 }
 
-fn get_env_key(key: &str, error: &str) -> String {
+fn get_env_key(key: &str, default: Option<&str>, error: &str) -> String {
     match std::env::var_os(key) {
         Some(val) => val.into_string().unwrap(),
         None => {
-            eprintln!("{}.", error);
-            process::exit(1);
+            match default {
+                Some(val) => val.to_string(),
+                None => {
+                    eprintln!("{}.", error);
+                    process::exit(1);
+                }
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_env_key_default() {
+        let result = get_env_key("DOES_NOT_EXIST_TEST", Some("default_value"), "testing error message");
+        assert_eq!(result, "default_value");
     }
 }

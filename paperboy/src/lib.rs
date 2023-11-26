@@ -12,8 +12,6 @@ pub use mailer::{Config, Credentials, Mailer};
 pub use rss::{Entry, Feed, FeedLoadError, FeedLoader};
 use serde_json::Map;
 
-const MAIL_SUBJECT: &str = "RSS Daily";
-
 #[derive(Debug)]
 pub struct Paperboy<'a> {
     template: &'a str,
@@ -44,8 +42,9 @@ impl<'a> Paperboy<'a> {
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
         let body = self.render_template(items).unwrap();
 
+        let subject = self.mailer_config.subject.clone();
         let response = Mailer::new(self.mailer_config)
-            .send(to, MAIL_SUBJECT.to_string(), body)
+            .send(to, subject, body)
             .await?;
 
         if !response.is_positive() {

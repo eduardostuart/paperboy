@@ -15,6 +15,7 @@ pub struct Credentials {
 
 #[derive(Debug)]
 pub struct Config {
+    pub subject: String,
     pub from: String,
     pub host: String,
     pub port: u16,
