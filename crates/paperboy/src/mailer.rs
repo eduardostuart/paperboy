@@ -45,17 +45,17 @@ impl Mailer {
                     SinglePart::builder()
                         .header(header::ContentType::TEXT_PLAIN)
                         .body(content_as_text),
-                ).singlepart(
-                    SinglePart::builder()
-                        .header(header::ContentType::TEXT_HTML)
-                        .body(content_as_html),
-                ),
-            None => MultiPart::alternative()
+                )
                 .singlepart(
                     SinglePart::builder()
                         .header(header::ContentType::TEXT_HTML)
                         .body(content_as_html),
-                )
+                ),
+            None => MultiPart::alternative().singlepart(
+                SinglePart::builder()
+                    .header(header::ContentType::TEXT_HTML)
+                    .body(content_as_html),
+            ),
         };
 
         let email = Message::builder()
@@ -65,7 +65,7 @@ impl Mailer {
             .multipart(parts)
             .unwrap();
 
-        let transport = SmtpTransport::starttls_relay(&*self.config.host)
+        let transport = SmtpTransport::starttls_relay(&self.config.host)
             .unwrap()
             .credentials(LettreCredentials::new(
                 self.config.credentials.username.clone(),

@@ -1,9 +1,8 @@
-use clap::AppSettings;
 use clap::Parser;
 use clap::Subcommand;
 
 #[derive(Parser, Debug)]
-#[clap(version, author = "Eduardo Stuart <e@s.tuart.me>", setting = AppSettings::ArgRequiredElseHelp)]
+#[command(version, author, about, arg_required_else_help(true))]
 pub struct Args {
     #[clap(flatten)]
     pub verbose: clap_verbosity_flag::Verbosity,
@@ -25,17 +24,4 @@ pub enum Commands {
         /// Email template as text (Using handlebars)
         template_text: Option<String>,
     },
-    // TODO
-    // #[clap(subcommand)]
-    // Subscription(SubscriptionCommands),
 }
-
-// #[derive(Subcommand, Debug)]
-// pub enum SubscriptionCommands {
-//     /// Add new site into subscriptions
-//     Add { url: Option<String> },
-//     /// Remove site from subscriptions
-//     Remove { url: Option<String> },
-//     /// List all subscriptions
-//     List,
-// }

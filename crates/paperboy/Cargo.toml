@@ -1,0 +1,30 @@
+[package]
+name = "paperboy"
+version = "0.1.3"
+description = "Get new posts from all your favorite sites by email."
+documentation = "https://docs.rs/paperboy"
+keywords.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+homepage.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+lettre = { version = "0.11.2", features = ["rustls-tls"]}
+futures = "0.3.29"
+feed-rs = "1.3"
+chrono = "0.4.31"
+handlebars = "4.5.0"
+regex = "1.10.2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+log =  { workspace = true }
+tokio = { workspace = true }
+
+[dev-dependencies]
+rand = "0.8.5"
