@@ -6,6 +6,7 @@ use std::ops::Sub;
 
 const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
 const HTTPCLIENT_CONNECTION_TIMEOUT_SECS: u64 = 3;
+const USER_AGENT: &str = "Paperboy (github.com/eduardostuart/paperboy)";
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Entry {
@@ -53,10 +54,7 @@ impl Feed {
                 "Accept",
                 "application/rss+xml, application/rdf+xml, application/atom+xml, application/feed+json, application/xml;q=0.9, text/xml;q=0.8"
             )
-            .header(
-                "User-Agent",
-                "Paperboy (https://github.com/eduardostuart/paperboy)"
-            )
+            .header("User-Agent",USER_AGENT)
             .send()
             .await?
             .bytes()
