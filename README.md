@@ -17,15 +17,32 @@ Check out the [release page](https://github.com/eduardostuart/paperboy/releases/
 Set these environment variable values:
 
 ```bash
-SMTP_HOST="smtp.fastmail.com" # Which service are you using? fastmail? gmail? sendgrid? ...
-SMTP_PORT=465 # 25 is the default port
-SMTP_USERNAME="username"
-SMTP_PASSWORD="password"
-SMTP_FROM="Paperboy <rss@your-domain.com>" # Who will send new posts by email?
-EMAIL_SUBJECT="RSS news by Paperboy"
+SMTP_HOST="smtp.mailtrap.io"               # SMTP host
+SMTP_PORT=2525                             # SMTP port
+SMTP_USERNAME="username"                   # SMTP username
+SMTP_PASSWORD="password"                   # SMTP password
+SMTP_FROM="Paperboy <rss@domain.com>"      # the sender
+MAIL_TO="email@domain.com"                 # the recipient
+EMAIL_SUBJECT="Subject"                    # Email subject (optional)
 ```
 
-Deliver command:
+```sh
+Paperboy CLI
+
+Usage: paperboy [OPTIONS] <COMMAND>
+
+Commands:
+  deliver  Deliver new posts from sites by email
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -v, --verbose...  More output per occurrence
+  -q, --quiet...    Less output per occurrence
+  -h, --help        Print help
+  -V, --version     Print version
+```
+
+### Deliver command
 
 ```bash
 paperboy deliver email@domain subscriptions.txt template.hbs template_text.hbs
