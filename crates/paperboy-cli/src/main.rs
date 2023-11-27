@@ -1,7 +1,7 @@
 use std::{path::Path, process};
 
 use crate::{cli::Args, deliver::MailConfig};
-use clap::StructOpt;
+use clap::Parser;
 use cli::Commands;
 use paperboy::Result;
 

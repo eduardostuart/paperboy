@@ -1,0 +1,17 @@
+[package]
+name = "paperboy-cli"
+version = "0.1.6"
+edition = "2021"
+description = "Paperboy CLI"
+
+[dependencies]
+paperboy = { path = "../paperboy"}
+clap = { version = "4.4", features = ["derive"] }
+clap-verbosity-flag = "2.1"
+tokio = { workspace= true }
+log = { workspace = true}
+simple_logger = "4.3"
+
+[[bin]]
+name = "paperboy"
+path = "./src/main.rs"
