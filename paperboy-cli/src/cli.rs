@@ -20,8 +20,10 @@ pub enum Commands {
         email: String,
         /// Subscription file
         subscription_file: String,
-        /// Email template (Using handlebars)
-        template: String,
+        /// Email template as HTML (Using handlebars)
+        template_html: String,
+        /// Email template as text (Using handlebars)
+        template_text: Option<String>,
     },
     // TODO
     // #[clap(subcommand)]

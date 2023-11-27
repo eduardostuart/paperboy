@@ -25,7 +25,8 @@ async fn main() -> Result<()> {
         Commands::Deliver {
             email,
             subscription_file,
-            template,
+            template_html,
+            template_text,
         } => {
             log::trace!("Deliver command");
 
@@ -37,7 +38,7 @@ async fn main() -> Result<()> {
                 std::process::exit(1);
             }
 
-            deliver_rss_by_email(email, subscription_file, template).await?;
+            deliver_rss_by_email(email, subscription_file, template_html, template_text).await?;
         }
     };
 
@@ -47,7 +48,8 @@ async fn main() -> Result<()> {
 async fn deliver_rss_by_email(
     email: String,
     subscription_file: String,
-    template: String,
+    template_html: String,
+    template_text: Option<String>,
 ) -> Result<()> {
     let smtp_port = match option_env!("SMTP_PORT") {
         Some(p) => p.parse::<u16>().unwrap(),
@@ -83,7 +85,7 @@ async fn deliver_rss_by_email(
         smtp_port: &smtp_port,
     };
 
-    let result = Deliver::new(&subscription_file, &template, config)
+    let result = Deliver::new(&subscription_file, &template_html, template_text.as_deref(), config)
         .handle(&email)
         .await?;
 
