@@ -20,7 +20,11 @@ pub struct Paperboy<'a> {
 }
 
 impl<'a> Paperboy<'a> {
-    pub fn new(template_html: &'a str, template_text: Option<&'a str>, mailer_config: Config) -> Self {
+    pub fn new(
+        template_html: &'a str,
+        template_text: Option<&'a str>,
+        mailer_config: Config,
+    ) -> Self {
         Self {
             template_html,
             template_text,
@@ -44,10 +48,9 @@ impl<'a> Paperboy<'a> {
 
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
         let body_html = self.render_template(&items, self.template_html).unwrap();
-        let body_text = match self.template_text {
-            Some (template) => Some(self.render_template(&items, template).unwrap()),
-            None => None,
-        };
+        let body_text = self
+            .template_text
+            .map(|template| self.render_template(&items, template).unwrap());
 
         let subject = self.mailer_config.subject.clone();
         let response = Mailer::new(self.mailer_config)

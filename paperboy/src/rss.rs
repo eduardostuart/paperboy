@@ -73,11 +73,10 @@ impl Feed {
             }
             Err(e) => {
                 log::debug!("Fetch result error {}", e);
-                return Err(crate::error::Error::CouldNotParseRSSFromUrl(format!(
+                Err(crate::error::Error::CouldNotParseRSSFromUrl(format!(
                     "{}: {}",
-                    self.url,
-                    e.to_string()
-                )));
+                    self.url, e
+                )))
             }
         }
     }

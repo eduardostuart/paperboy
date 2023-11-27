@@ -29,7 +29,12 @@ pub struct DeliverResult {
 }
 
 impl<'a> Deliver<'a> {
-    pub fn new(subscription_file: &'a str, template_html: &'a str, template_text: Option<&'a str>, mail_config: MailConfig<'a>) -> Self {
+    pub fn new(
+        subscription_file: &'a str,
+        template_html: &'a str,
+        template_text: Option<&'a str>,
+        mail_config: MailConfig<'a>,
+    ) -> Self {
         Self {
             template_html,
             template_text,

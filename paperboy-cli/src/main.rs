@@ -85,9 +85,14 @@ async fn deliver_rss_by_email(
         smtp_port: &smtp_port,
     };
 
-    let result = Deliver::new(&subscription_file, &template_html, template_text.as_deref(), config)
-        .handle(&email)
-        .await?;
+    let result = Deliver::new(
+        &subscription_file,
+        &template_html,
+        template_text.as_deref(),
+        config,
+    )
+    .handle(&email)
+    .await?;
 
     println!("\nResult: {:?}\n", result.message);
 
@@ -102,15 +107,13 @@ async fn deliver_rss_by_email(
 fn get_env_key(key: &str, default: Option<&str>, error: &str) -> String {
     match std::env::var_os(key) {
         Some(val) => val.into_string().unwrap(),
-        None => {
-            match default {
-                Some(val) => val.to_string(),
-                None => {
-                    eprintln!("{}.", error);
-                    process::exit(1);
-                }
+        None => match default {
+            Some(val) => val.to_string(),
+            None => {
+                eprintln!("{}.", error);
+                process::exit(1);
             }
-        }
+        },
     }
 }
 
@@ -120,7 +123,11 @@ mod tests {
 
     #[test]
     fn test_get_env_key_default() {
-        let result = get_env_key("DOES_NOT_EXIST_TEST", Some("default_value"), "testing error message");
+        let result = get_env_key(
+            "DOES_NOT_EXIST_TEST",
+            Some("default_value"),
+            "testing error message",
+        );
         assert_eq!(result, "default_value");
     }
 }
