@@ -16,8 +16,25 @@ jobs:
             archive: tar.gz tar.xz
           - target: x86_64-apple-darwin
             archive: zip
+          - target: armv7-unknown-linux-gnueabihf
+            archive: tar.gz
+          - target: aarch64-unknown-linux-gnu
+            archive: tar.gz
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Add rust targets
+        run: |
+          rustup target add armv7-unknown-linux-gnueabihf
+          rustup target add aarch64-unknown-linux-gnu
+
       - name: Compile and release
         uses: rust-build/rust-build.action@latest
         env:
