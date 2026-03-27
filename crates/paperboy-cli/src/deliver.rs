@@ -11,6 +11,7 @@ pub struct MailConfig<'a> {
     pub smtp_password: &'a str,
     pub smtp_host: &'a str,
     pub smtp_port: &'a u16,
+    pub smtp_starttls: bool,
 }
 
 #[derive(Debug)]
@@ -58,6 +59,7 @@ impl<'a> Deliver<'a> {
             },
             host: self.mail_config.smtp_host.to_string(),
             port: *self.mail_config.smtp_port,
+            starttls: self.mail_config.smtp_starttls,
         };
 
         log::debug!("Fetching latest posts from all subscriptions...");

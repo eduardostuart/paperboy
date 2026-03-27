@@ -51,10 +51,13 @@ async fn deliver_rss_by_email(
     template_html: String,
     template_text: Option<String>,
 ) -> Result<()> {
-    let smtp_port = match option_env!("SMTP_PORT") {
-        Some(p) => p.parse::<u16>().unwrap(),
-        None => 25,
-    };
+    let smtp_port = get_env_key("SMTP_PORT", Some("25"), "")
+        .parse::<u16>()
+        .expect("[Error] - SMTP_PORT must be a valid port number");
+
+    let smtp_starttls = get_env_key("SMTP_STARTTLS", Some("true"), "")
+        .to_lowercase()
+        != "false";
 
     let config = MailConfig {
         mail_subject: &get_env_key(
@@ -83,6 +86,7 @@ async fn deliver_rss_by_email(
             "[Error] - SMTP_USERNAME environment variable is not defined",
         ),
         smtp_port: &smtp_port,
+        smtp_starttls,
     };
 
     let result = Deliver::new(
