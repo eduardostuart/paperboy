@@ -6,9 +6,9 @@ description = "Paperboy CLI"
 
 [dependencies]
 paperboy = { path = "../paperboy"}
-clap = { version = "4.4", features = ["derive"] }
-clap-verbosity-flag = "2.1"
-simple_logger = "4.3"
+clap = { version = "4.6", features = ["derive"] }
+clap-verbosity-flag = "3.0"
+simple_logger = "5.0"
 tokio = { workspace= true }
 log = { workspace = true}
 

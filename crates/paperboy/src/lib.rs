@@ -76,7 +76,7 @@ pub mod test_util {
         panic,
     };
 
-    use rand::{distributions::Alphanumeric, Rng};
+    use rand::Rng;
 
     pub fn run<T>(test: T) -> ()
     where
@@ -87,8 +87,8 @@ pub mod test_util {
     }
 
     pub fn create_tmp_file(content: &str) -> (String, String) {
-        let random: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
+        let random: String = rand::rng()
+            .sample_iter(rand::distr::Alphanumeric)
             .take(7)
             .map(char::from)
             .collect();

@@ -22,6 +22,7 @@ pub struct Deliver<'a> {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct DeliverResult {
     pub delivered: bool,
     pub message: String,

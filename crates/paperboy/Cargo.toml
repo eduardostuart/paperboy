@@ -14,17 +14,17 @@ homepage.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
-lettre = { version = "0.11.2", features = ["rustls-tls"]}
-futures = "0.3.29"
-feed-rs = "1.3"
-chrono = "0.4.31"
-handlebars = "4.5.0"
-regex = "1.10.2"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+lettre = { version = "0.11.11", features = ["rustls-tls"]}
+futures = "0.3.32"
+feed-rs = "2.3"
+chrono = "0.4.44"
+handlebars = "6.3"
+regex = "1.11"
 serde = { workspace = true }
 serde_json = { workspace = true }
 log =  { workspace = true }
 tokio = { workspace = true }
 
 [dev-dependencies]
-rand = "0.8.5"
+rand = "0.9"
