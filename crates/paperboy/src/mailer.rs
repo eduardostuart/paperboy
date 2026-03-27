@@ -20,6 +20,7 @@ pub struct Config {
     pub host: String,
     pub port: u16,
     pub credentials: Credentials,
+    pub starttls: bool,
 }
 
 #[derive(Debug)]
@@ -65,13 +66,23 @@ impl Mailer {
             .multipart(parts)
             .unwrap();
 
-        let transport = SmtpTransport::starttls_relay(&self.config.host)
-            .unwrap()
-            .credentials(LettreCredentials::new(
-                self.config.credentials.username.clone(),
-                self.config.credentials.password.clone(),
-            ))
-            .build();
+        let creds = LettreCredentials::new(
+            self.config.credentials.username.clone(),
+            self.config.credentials.password.clone(),
+        );
+
+        let transport = if self.config.starttls {
+            SmtpTransport::starttls_relay(&self.config.host)
+                .unwrap()
+                .port(self.config.port)
+                .credentials(creds)
+                .build()
+        } else {
+            SmtpTransport::builder_dangerous(&self.config.host)
+                .port(self.config.port)
+                .credentials(creds)
+                .build()
+        };
 
         Ok(transport.send(&email)?)
     }

@@ -22,6 +22,7 @@ SMTP_PORT=2525                             # SMTP port
 SMTP_USERNAME="username"                   # SMTP username
 SMTP_PASSWORD="password"                   # SMTP password
 SMTP_FROM="Paperboy <rss@domain.com>"      # the sender
+SMTP_STARTTLS="true"                       # use STARTTLS (default: true, set to false for local dev)
 MAIL_TO="email@domain.com"                 # the recipient
 EMAIL_SUBJECT="Subject"                    # Email subject (optional)
 ```
@@ -45,13 +46,29 @@ Options:
 ### Deliver command
 
 ```bash
-paperboy deliver email@domain subscriptions.txt template.hbs template_text.hbs
-# Template example.: emails/daily_email.hbs
+paperboy deliver reader@localhost subs_example.txt emails/daily_email.hbs emails/daily_email_text.hbs
 ```
 
 ## GitHub template
 
 If you want an **automatic** and **free** way to receive daily "newspapers" using `paperboy`, take a look at the [paperboy-template](https://github.com/eduardostuart/paperboy-template) GitHub project.
+
+## Local development
+
+Use Docker Compose to run [Mailpit](https://github.com/axllent/mailpit) for local email testing:
+
+```bash
+docker compose up -d
+```
+
+Then configure the environment variables (see `.env.example`):
+
+```bash
+source .env.example
+cargo run -- deliver reader@localhost subs_example.txt emails/daily_email.hbs emails/daily_email_text.hbs
+```
+
+Open `http://localhost:8025` to view the received emails.
 
 ## Tests
 
