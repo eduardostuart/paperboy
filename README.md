@@ -10,7 +10,7 @@ A CLI that mails you every fresh post from your RSS, Atom, and JSON feed subscri
 - Renders the digest through a Handlebars HTML template (plus an optional plain-text alternative)
 - Delivers through any SMTP relay and pairs with the [paperboy-template](https://github.com/eduardostuart/paperboy-template) GitHub Action for fully automated daily delivery
 
-[`download`](https://github.com/eduardostuart/paperboy/releases/latest) · [`docs.rs`](https://docs.rs/paperboy) · [`development`](./docs/DEVELOPMENT.md) · [`license`](./LICENSE-MIT)
+[`download`](https://github.com/eduardostuart/paperboy/releases/latest) · [`docs.rs`](https://docs.rs/paperboy) · [`development & usage`](./docs/DEVELOPMENT.md) · [`license`](./LICENSE-MIT)
 
 <br clear="both" />
 
