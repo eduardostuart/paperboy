@@ -2,18 +2,24 @@
 
 use std::{error::Error as StdError, fmt, io};
 
+/// The error type returned by fallible paperboy operations.
 #[derive(Debug)]
 pub enum Error {
+    /// The SMTP server accepted the message but returned a non-positive
+    /// response code.
     ErrorSendingMail(String),
-    /// Reqwest http error
+    /// A transport-level HTTP error occurred while fetching a feed.
     Http(String),
-    /// Feed URl parser error
+    /// The response body could not be parsed as a feed.
     CouldNotParseRSSFromUrl(String),
-    /// IO Error
+    /// An I/O error (file read, template load, etc.).
     IO(io::Error),
-    /// Error while sending email
+    /// The email message could not be assembled (e.g. invalid address).
     MailContentError(String),
+    /// The SMTP transport failed (connection, authentication, etc.).
     SmtpError(String),
+    /// The email template could not be loaded or rendered.
+    TemplateError(String),
 }
 
 impl From<reqwest::Error> for Error {
@@ -40,6 +46,18 @@ impl From<lettre::transport::smtp::Error> for Error {
     }
 }
 
+impl From<handlebars::RenderError> for Error {
+    fn from(e: handlebars::RenderError) -> Self {
+        Self::TemplateError(e.to_string())
+    }
+}
+
+impl From<handlebars::TemplateError> for Error {
+    fn from(e: handlebars::TemplateError) -> Self {
+        Self::TemplateError(e.to_string())
+    }
+}
+
 impl StdError for Error {}
 
 impl fmt::Display for Error {
@@ -51,6 +69,7 @@ impl fmt::Display for Error {
             Self::MailContentError(ref e) => write!(f, "{}", e),
             Self::ErrorSendingMail(ref e) => write!(f, "{}", e),
             Self::SmtpError(ref e) => write!(f, "{}", e),
+            Self::TemplateError(ref e) => write!(f, "{}", e),
         }
     }
 }

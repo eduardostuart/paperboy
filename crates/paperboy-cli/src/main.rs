@@ -31,8 +31,8 @@ async fn main() -> Result<()> {
             log::trace!("Deliver command");
 
             if !Path::new(&subscription_file).is_file() {
-                eprint!(
-                    "[Error] - Subscription file {} does not exist",
+                eprintln!(
+                    "[Error] - Subscription file {} does not exist.",
                     subscription_file
                 );
                 std::process::exit(1);
@@ -100,8 +100,7 @@ async fn deliver_rss_by_email(
 
     println!("\nResult: {:?}\n", result.message);
 
-    if result.errors.is_some() {
-        let errors = result.errors.unwrap();
+    if let Some(errors) = result.errors {
         eprintln!("({}) Errors:\n{:#?}\n", &errors.len(), &errors);
     }
 
