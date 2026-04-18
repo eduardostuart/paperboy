@@ -14,7 +14,7 @@ homepage.workspace = true
 
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
-lettre = { version = "0.11.11", features = ["rustls-tls"]}
+lettre = { version = "0.11.11", default-features = false, features = ["smtp-transport", "builder", "rustls-tls", "hostname"] }
 futures = "0.3.32"
 feed-rs = "2.3"
 chrono = "0.4.44"
