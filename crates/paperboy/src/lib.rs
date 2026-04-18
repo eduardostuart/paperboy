@@ -70,6 +70,87 @@ impl<'a> Paperboy<'a> {
 }
 
 #[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    fn dummy_config() -> Config {
+        Config {
+            subject: "S".to_string(),
+            from: "a@b.c".to_string(),
+            host: "localhost".to_string(),
+            port: 25,
+            credentials: Credentials {
+                username: "u".to_string(),
+                password: "p".to_string(),
+            },
+            starttls: false,
+        }
+    }
+
+    fn write_template(content: &str) -> tempfile::NamedTempFile {
+        let mut file = tempfile::Builder::new()
+            .suffix(".hbs")
+            .tempfile()
+            .unwrap();
+        file.write_all(content.as_bytes()).unwrap();
+        file
+    }
+
+    #[test]
+    fn render_template_iterates_over_feeds_and_entries() {
+        let tpl = write_template(
+            "{{#each items}}{{this.title}}:{{#each this.entries}}{{this.title}}|{{this.url}};{{/each}}{{/each}}",
+        );
+        let path = tpl.path().to_str().unwrap().to_string();
+        let paperboy = Paperboy::new(&path, None, dummy_config());
+
+        let feeds = vec![Feed {
+            url: "http://blog".to_string(),
+            title: "Blog".to_string(),
+            entries: vec![
+                Entry {
+                    title: "Post 1".to_string(),
+                    url: "http://blog/1".to_string(),
+                },
+                Entry {
+                    title: "Post 2".to_string(),
+                    url: "http://blog/2".to_string(),
+                },
+            ],
+        }];
+
+        let rendered = paperboy.render_template(&feeds, &path).unwrap();
+        assert_eq!(rendered, "Blog:Post 1|http://blog/1;Post 2|http://blog/2;");
+    }
+
+    #[test]
+    fn render_template_returns_error_for_missing_file() {
+        let paperboy = Paperboy::new("/does/not/exist.hbs", None, dummy_config());
+        let err = paperboy
+            .render_template(&vec![], "/does/not/exist.hbs")
+            .unwrap_err();
+        match err {
+            error::Error::TemplateError(_) | error::Error::IO(_) => {}
+            other => panic!("expected template or io error, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn render_template_returns_error_for_invalid_template_syntax() {
+        let tpl = write_template("{{#each items}}unclosed");
+        let path = tpl.path().to_str().unwrap().to_string();
+        let paperboy = Paperboy::new(&path, None, dummy_config());
+
+        let err = paperboy.render_template(&vec![], &path).unwrap_err();
+        match err {
+            error::Error::TemplateError(_) => {}
+            other => panic!("expected TemplateError, got {:?}", other),
+        }
+    }
+}
+
+#[cfg(test)]
 pub mod test_util {
     use std::{
         fs::{create_dir_all, File},

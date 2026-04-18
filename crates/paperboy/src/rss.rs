@@ -160,3 +160,215 @@ impl FeedLoader {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse_entry_from(xml: &str) -> feed_rs::model::Entry {
+        feed_rs::parser::parse(xml.as_bytes())
+            .unwrap()
+            .entries
+            .into_iter()
+            .next()
+            .unwrap()
+    }
+
+    fn seed_entry() -> feed_rs::model::Entry {
+        parse_entry_from(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel><title>T</title><link>http://e</link><description>D</description>
+<item><title>seed-title</title><link>http://seed-link</link></item>
+</channel></rss>"#,
+        )
+    }
+
+    fn entry_with_published(published: chrono::DateTime<Utc>) -> feed_rs::model::Entry {
+        feed_rs::model::Entry {
+            published: Some(published),
+            ..seed_entry()
+        }
+    }
+
+    fn feed() -> Feed {
+        Feed::new("http://example.com/feed".to_string())
+    }
+
+    #[test]
+    fn filter_keeps_entries_from_last_24h() {
+        let entry = entry_with_published(Utc::now());
+        let result = feed().filter_items_from_yesterday(vec![entry]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].title, "seed-title");
+        assert!(result[0].url.starts_with("http://seed-link"));
+    }
+
+    #[test]
+    fn filter_drops_entries_older_than_yesterday() {
+        let entry = entry_with_published(Utc::now() - Duration::days(3));
+        let result = feed().filter_items_from_yesterday(vec![entry]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn filter_drops_entries_with_no_publish_date() {
+        let entry = feed_rs::model::Entry {
+            published: None,
+            ..seed_entry()
+        };
+        let result = feed().filter_items_from_yesterday(vec![entry]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn filter_does_not_panic_on_entry_without_title() {
+        // Regression: previous version called entry.title.unwrap()
+        let entry = feed_rs::model::Entry {
+            title: None,
+            published: Some(Utc::now()),
+            ..seed_entry()
+        };
+        let result = feed().filter_items_from_yesterday(vec![entry]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn filter_does_not_panic_on_entry_without_links() {
+        // Regression: previous version called entry.links.first().unwrap()
+        let entry = feed_rs::model::Entry {
+            links: vec![],
+            published: Some(Utc::now()),
+            ..seed_entry()
+        };
+        let result = feed().filter_items_from_yesterday(vec![entry]);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn filter_keeps_valid_and_skips_malformed_in_same_batch() {
+        let good = entry_with_published(Utc::now());
+        let no_title = feed_rs::model::Entry {
+            title: None,
+            published: Some(Utc::now()),
+            ..seed_entry()
+        };
+        let no_link = feed_rs::model::Entry {
+            links: vec![],
+            published: Some(Utc::now()),
+            ..seed_entry()
+        };
+        let result = feed().filter_items_from_yesterday(vec![good, no_title, no_link]);
+        assert_eq!(result.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn fetch_parses_valid_rss_and_keeps_fresh_items() {
+        let mut server = mockito::Server::new_async().await;
+        let body = format!(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>My Blog</title>
+<link>http://example.com</link>
+<description>Blog</description>
+<item>
+<title>Today Post</title>
+<link>http://example.com/today</link>
+<pubDate>{}</pubDate>
+</item>
+</channel>
+</rss>"#,
+            Utc::now().format("%a, %d %b %Y %H:%M:%S GMT")
+        );
+        let _m = server
+            .mock("GET", "/feed")
+            .with_status(200)
+            .with_header("content-type", "application/rss+xml")
+            .with_body(&body)
+            .create_async()
+            .await;
+
+        let feed = Feed::new(format!("{}/feed", server.url())).fetch().await.unwrap();
+        assert_eq!(feed.title, "My Blog");
+        assert_eq!(feed.entries.len(), 1);
+        assert_eq!(feed.entries[0].title, "Today Post");
+    }
+
+    #[tokio::test]
+    async fn fetch_falls_back_to_url_when_feed_has_no_title() {
+        // Regression: previous version called result.title.unwrap()
+        let mut server = mockito::Server::new_async().await;
+        // Atom feed without a <title> element
+        let body = r#"<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<id>urn:example</id>
+<updated>2099-01-01T00:00:00Z</updated>
+</feed>"#;
+        let _m = server
+            .mock("GET", "/feed")
+            .with_status(200)
+            .with_body(body)
+            .create_async()
+            .await;
+
+        let url = format!("{}/feed", server.url());
+        let feed = Feed::new(url.clone()).fetch().await.unwrap();
+        assert_eq!(feed.title, url);
+    }
+
+    #[tokio::test]
+    async fn fetch_returns_parse_error_for_non_feed_body() {
+        let mut server = mockito::Server::new_async().await;
+        let _m = server
+            .mock("GET", "/not-a-feed")
+            .with_status(200)
+            .with_body("<html><body>not a feed</body></html>")
+            .create_async()
+            .await;
+
+        let err = Feed::new(format!("{}/not-a-feed", server.url()))
+            .fetch()
+            .await
+            .unwrap_err();
+        match err {
+            crate::error::Error::CouldNotParseRSSFromUrl(_) => {}
+            other => panic!("expected CouldNotParseRSSFromUrl, got {:?}", other),
+        }
+    }
+
+    #[tokio::test]
+    async fn fetch_returns_http_error_on_5xx() {
+        let mut server = mockito::Server::new_async().await;
+        let _m = server
+            .mock("GET", "/boom")
+            .with_status(500)
+            .create_async()
+            .await;
+
+        // A 500 with empty body fails feed parsing, which surfaces as a parse error.
+        // The important guarantee is that it returns Err rather than panicking.
+        let result = Feed::new(format!("{}/boom", server.url())).fetch().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn feed_loader_returns_none_when_all_feeds_have_no_entries() {
+        let mut server = mockito::Server::new_async().await;
+        let body = r#"<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel><title>Empty</title><link>http://e</link><description>D</description></channel>
+</rss>"#;
+        let _m = server
+            .mock("GET", "/empty")
+            .with_status(200)
+            .with_body(body)
+            .create_async()
+            .await;
+
+        let result = FeedLoader::new(vec![format!("{}/empty", server.url())])
+            .load()
+            .await;
+        assert!(result.is_none());
+    }
+}
