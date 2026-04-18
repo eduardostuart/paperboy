@@ -15,6 +15,5 @@ readme = "./README.md"
 homepage = "https://github.com/eduardostuart/paperboy"
 repository = "https://github.com/eduardostuart/paperboy.git"
 description = "Get new posts from all your favorite sites by email."
-documentation = "https://docs.rs/paperboy"
 license = "MIT"
 keywords = ["rss", "feed", "rss-reader"]
