@@ -63,10 +63,14 @@ impl Feed {
         match feed_rs::parser::parse(&content[..]) {
             Ok(result) => {
                 log::debug!("Fetch Result {:?}", result);
+                let title = result
+                    .title
+                    .map(|t| t.content)
+                    .unwrap_or_else(|| self.url.clone());
                 Ok(Feed {
                     url: String::from(&self.url),
-                    title: result.title.unwrap().content,
-                    entries: self.filter_items_from_yesterday(result.entries).to_vec(),
+                    title,
+                    entries: self.filter_items_from_yesterday(result.entries),
                 })
             }
             Err(e) => {
@@ -91,9 +95,10 @@ impl Feed {
                 Some(published) => published.ge(&yesterday),
                 None => false,
             })
-            .map(|entry| Entry {
-                url: entry.links.first().unwrap().href.clone(),
-                title: entry.title.unwrap().content,
+            .filter_map(|entry| {
+                let url = entry.links.first().map(|l| l.href.clone())?;
+                let title = entry.title.map(|t| t.content)?;
+                Some(Entry { url, title })
             })
             .collect::<Vec<Entry>>()
     }
@@ -119,7 +124,7 @@ impl FeedLoader {
         log::trace!("Loading {} subscriptions", self.subscriptions.len());
 
         let mut futures = futures::stream::iter(self.subscriptions.to_owned())
-            .map(|url| tokio::spawn(async move { Feed::new(url).fetch().await }))
+            .map(|url| Feed::new(url).fetch())
             .buffer_unordered(10);
 
         let mut items = Vec::new();
@@ -127,19 +132,15 @@ impl FeedLoader {
 
         while let Some(f) = futures.next().await {
             match f {
-                Ok(Ok(feed)) => {
+                Ok(feed) => {
                     log::debug!("Feed {} has {} items", feed.url, feed.entries.len());
 
                     if !feed.entries.is_empty() {
                         items.push(feed);
                     }
                 }
-                Ok(Err(e)) => {
-                    log::error!("Error while loading feed {}", e);
-                    errors.push(e.to_string());
-                }
                 Err(e) => {
-                    log::error!("Error {}", e);
+                    log::error!("Error while loading feed {}", e);
                     errors.push(e.to_string());
                 }
             }

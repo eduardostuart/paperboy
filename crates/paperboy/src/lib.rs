@@ -36,21 +36,22 @@ impl<'a> Paperboy<'a> {
         &self,
         items: &Vec<Feed>,
         template_path: &str,
-    ) -> crate::Result<String, handlebars::RenderError> {
+    ) -> crate::Result<String> {
         let mut template = Handlebars::new();
         template.register_template_file("main", template_path)?;
 
         let mut data: Map<String, Value> = Map::new();
         data.insert("items".to_string(), to_json(items));
 
-        template.render("main", &data)
+        Ok(template.render("main", &data)?)
     }
 
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
-        let body_html = self.render_template(&items, self.template_html).unwrap();
+        let body_html = self.render_template(&items, self.template_html)?;
         let body_text = self
             .template_text
-            .map(|template| self.render_template(&items, template).unwrap());
+            .map(|template| self.render_template(&items, template))
+            .transpose()?;
 
         let subject = self.mailer_config.subject.clone();
         let response = Mailer::new(self.mailer_config)

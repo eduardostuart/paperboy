@@ -14,6 +14,8 @@ pub enum Error {
     /// Error while sending email
     MailContentError(String),
     SmtpError(String),
+    /// Error while rendering the email template
+    TemplateError(String),
 }
 
 impl From<reqwest::Error> for Error {
@@ -40,6 +42,18 @@ impl From<lettre::transport::smtp::Error> for Error {
     }
 }
 
+impl From<handlebars::RenderError> for Error {
+    fn from(e: handlebars::RenderError) -> Self {
+        Self::TemplateError(e.to_string())
+    }
+}
+
+impl From<handlebars::TemplateError> for Error {
+    fn from(e: handlebars::TemplateError) -> Self {
+        Self::TemplateError(e.to_string())
+    }
+}
+
 impl StdError for Error {}
 
 impl fmt::Display for Error {
@@ -51,6 +65,7 @@ impl fmt::Display for Error {
             Self::MailContentError(ref e) => write!(f, "{}", e),
             Self::ErrorSendingMail(ref e) => write!(f, "{}", e),
             Self::SmtpError(ref e) => write!(f, "{}", e),
+            Self::TemplateError(ref e) => write!(f, "{}", e),
         }
     }
 }
