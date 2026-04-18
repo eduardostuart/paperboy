@@ -1,10 +1,50 @@
+//! Deliver new posts from RSS, Atom, or JSON feeds by email.
+//!
+//! This crate powers the [`paperboy`](https://github.com/eduardostuart/paperboy)
+//! CLI. It concurrently fetches a list of subscriptions, keeps entries
+//! published within the last 24 hours, renders them through a Handlebars
+//! template, and sends the result over SMTP.
+//!
+//! The high-level entry point is [`Paperboy`]. Feeds are loaded with
+//! [`FeedLoader`] and delivered through [`Mailer`].
+//!
+//! # Example
+//!
+//! ```no_run
+//! use paperboy::{Config, Credentials, FeedLoader, Paperboy};
+//!
+//! # async fn run() -> paperboy::Result<()> {
+//! let subscriptions = vec!["https://example.com/feed.xml".to_string()];
+//! let (feeds, _errors) = FeedLoader::new(subscriptions)
+//!     .load()
+//!     .await
+//!     .expect("at least one feed returned entries");
+//!
+//! let config = Config {
+//!     subject: "Daily digest".into(),
+//!     from: "Paperboy <news@example.com>".into(),
+//!     host: "smtp.example.com".into(),
+//!     port: 587,
+//!     credentials: Credentials {
+//!         username: "user".into(),
+//!         password: "pass".into(),
+//!     },
+//!     starttls: true,
+//! };
+//!
+//! Paperboy::new("daily.html.hbs", None, config)
+//!     .deliver(feeds, "reader@example.com".into())
+//!     .await
+//! # }
+//! ```
+
 pub mod error;
 
 pub mod mailer;
 mod rss;
 pub mod subscriptions;
 
-/// Alias for a `Result` with the error type `paperboy::error::Error`.
+/// A [`std::result::Result`] whose error defaults to [`error::Error`].
 pub type Result<T, E = error::Error> = std::result::Result<T, E>;
 
 use handlebars::{to_json, Handlebars, JsonValue as Value};
@@ -12,6 +52,13 @@ pub use mailer::{Config, Credentials, Mailer};
 pub use rss::{Entry, Feed, FeedLoadError, FeedLoader};
 use serde_json::Map;
 
+/// Renders a collection of feeds into email bodies and delivers them over SMTP.
+///
+/// Both template paths are resolved at render time using
+/// [Handlebars](https://handlebarsjs.com/). The HTML template is mandatory; the
+/// plain-text template is optional and, when provided, is sent as the
+/// `text/plain` alternative so mail clients that cannot render HTML still show
+/// readable content.
 #[derive(Debug)]
 pub struct Paperboy<'a> {
     template_html: &'a str,
@@ -20,6 +67,12 @@ pub struct Paperboy<'a> {
 }
 
 impl<'a> Paperboy<'a> {
+    /// Builds a new `Paperboy`.
+    ///
+    /// `template_html` is a filesystem path to a Handlebars template that
+    /// receives an `items` array (each element is a [`Feed`] with nested
+    /// [`Entry`] values). `template_text` is an optional path used for the
+    /// plain-text alternative.
     pub fn new(
         template_html: &'a str,
         template_text: Option<&'a str>,
@@ -46,6 +99,14 @@ impl<'a> Paperboy<'a> {
         Ok(template.render("main", &data)?)
     }
 
+    /// Renders `items` through the configured templates and sends the email
+    /// to `to`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`error::Error`] if the template cannot be rendered, if the
+    /// SMTP transport rejects the message, or if the server returns a
+    /// non-positive response.
     pub async fn deliver(self, items: Vec<Feed>, to: String) -> crate::Result<()> {
         let body_html = self.render_template(&items, self.template_html)?;
         let body_text = self

@@ -1,3 +1,5 @@
+//! Fetch and parse RSS, Atom, and JSON feeds.
+
 use chrono::{Duration, Utc};
 use futures::StreamExt;
 use reqwest::Client;
@@ -8,16 +10,26 @@ const HTTPCLIENT_TIMEOUT_SECS: u64 = 3;
 const HTTPCLIENT_CONNECTION_TIMEOUT_SECS: u64 = 3;
 const USER_AGENT: &str = "Paperboy (github.com/eduardostuart/paperboy)";
 
+/// A single entry (article) from a feed.
 #[derive(Debug, Serialize, Clone)]
 pub struct Entry {
+    /// Title of the entry.
     pub title: String,
+    /// URL pointing to the entry's page.
     pub url: String,
 }
 
+/// A parsed feed together with the entries that should be delivered.
+///
+/// Only entries published within the last 24 hours are retained; older entries
+/// and entries without a publication date are dropped.
 #[derive(Debug, Serialize)]
 pub struct Feed {
+    /// URL of the feed itself (not of any individual entry).
     pub url: String,
+    /// Feed title, or the feed URL if the source did not advertise one.
     pub title: String,
+    /// Entries published within the last 24 hours.
     pub entries: Vec<Entry>,
 }
 
@@ -32,6 +44,7 @@ impl Default for Feed {
 }
 
 impl Feed {
+    /// Creates an empty `Feed` associated with the given URL.
     pub fn new(url: String) -> Self {
         Self {
             url,
@@ -39,6 +52,16 @@ impl Feed {
         }
     }
 
+    /// Fetches the feed over HTTP and parses it.
+    ///
+    /// Uses a 3-second connect and read timeout. Entries without a publication
+    /// date and entries older than 24 hours are dropped.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`crate::error::Error::Http`] for transport-level failures and
+    /// [`crate::error::Error::CouldNotParseRSSFromUrl`] when the response
+    /// cannot be parsed as a feed.
     pub async fn fetch(self) -> crate::Result<Feed> {
         log::debug!("Fetching url {}", &self.url);
 
@@ -104,22 +127,35 @@ impl Feed {
     }
 }
 
+/// Concurrently fetches a batch of subscription URLs.
+///
+/// At most 10 requests are in flight at a time.
 #[derive(Debug)]
 pub struct FeedLoader {
+    /// Feed URLs to load.
     pub subscriptions: Vec<String>,
 }
 
+/// Aggregated failures reported by [`FeedLoader::load`].
 #[derive(Debug)]
 pub struct FeedLoadError {
+    /// `true` when at least one feed failed to load.
     pub has_errors: bool,
+    /// Human-readable error messages, one per failed feed.
     pub errors: Vec<String>,
 }
 
 impl FeedLoader {
+    /// Creates a new loader for the provided subscription URLs.
     pub fn new(subscriptions: Vec<String>) -> Self {
         FeedLoader { subscriptions }
     }
 
+    /// Loads every subscription in parallel and returns the feeds that have
+    /// fresh entries alongside any per-feed errors.
+    ///
+    /// Returns `None` when no feed produced any fresh entry, so callers can
+    /// short-circuit the delivery step.
     pub async fn load(&self) -> Option<(Vec<Feed>, FeedLoadError)> {
         log::trace!("Loading {} subscriptions", self.subscriptions.len());
 

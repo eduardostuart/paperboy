@@ -1,5 +1,15 @@
+//! Read a newline-separated list of subscription URLs from a file.
+
 use std::fs::read_to_string;
 
+/// Loads subscription URLs from `file`.
+///
+/// Each non-empty, non-comment line is trimmed and returned. Lines whose first
+/// character is `#` are treated as comments and skipped.
+///
+/// # Panics
+///
+/// Panics if `file` cannot be read.
 pub fn load_from_file(file: &str) -> Vec<String> {
     log::info!("Loading subscriptions file {}", &file);
 

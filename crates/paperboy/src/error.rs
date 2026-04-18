@@ -2,19 +2,23 @@
 
 use std::{error::Error as StdError, fmt, io};
 
+/// The error type returned by fallible paperboy operations.
 #[derive(Debug)]
 pub enum Error {
+    /// The SMTP server accepted the message but returned a non-positive
+    /// response code.
     ErrorSendingMail(String),
-    /// Reqwest http error
+    /// A transport-level HTTP error occurred while fetching a feed.
     Http(String),
-    /// Feed URl parser error
+    /// The response body could not be parsed as a feed.
     CouldNotParseRSSFromUrl(String),
-    /// IO Error
+    /// An I/O error (file read, template load, etc.).
     IO(io::Error),
-    /// Error while sending email
+    /// The email message could not be assembled (e.g. invalid address).
     MailContentError(String),
+    /// The SMTP transport failed (connection, authentication, etc.).
     SmtpError(String),
-    /// Error while rendering the email template
+    /// The email template could not be loaded or rendered.
     TemplateError(String),
 }
 
