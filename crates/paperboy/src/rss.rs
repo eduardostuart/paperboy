@@ -332,6 +332,50 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn fetch_parses_json_feed_and_keeps_fresh_items() {
+        let mut server = mockito::Server::new_async().await;
+        let body = format!(
+            r#"{{
+    "version": "https://jsonfeed.org/version/1.1",
+    "title": "My JSON Feed",
+    "home_page_url": "http://example.com/",
+    "feed_url": "http://example.com/feed.json",
+    "items": [
+        {{
+            "id": "1",
+            "title": "Today JSON Post",
+            "url": "http://example.com/today",
+            "date_published": "{}"
+        }},
+        {{
+            "id": "2",
+            "title": "Old JSON Post",
+            "url": "http://example.com/old",
+            "date_published": "2020-01-01T00:00:00Z"
+        }}
+    ]
+}}"#,
+            Utc::now().to_rfc3339()
+        );
+        let _m = server
+            .mock("GET", "/feed.json")
+            .with_status(200)
+            .with_header("content-type", "application/feed+json")
+            .with_body(&body)
+            .create_async()
+            .await;
+
+        let feed = Feed::new(format!("{}/feed.json", server.url()))
+            .fetch()
+            .await
+            .unwrap();
+        assert_eq!(feed.title, "My JSON Feed");
+        assert_eq!(feed.entries.len(), 1);
+        assert_eq!(feed.entries[0].title, "Today JSON Post");
+        assert!(feed.entries[0].url.starts_with("http://example.com/today"));
+    }
+
+    #[tokio::test]
     async fn fetch_falls_back_to_url_when_feed_has_no_title() {
         // Regression: previous version called result.title.unwrap()
         let mut server = mockito::Server::new_async().await;
